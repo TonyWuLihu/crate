@@ -101,10 +101,9 @@ public class MapSideDataCollectOperation {
             RoutedCollectPhase routedCollectPhase = (RoutedCollectPhase) collectPhase;
             switch (routedCollectPhase.maxRowGranularity()) {
                 case NODE:
-                    break;
                 case DOC:
                     EvaluatingNormalizer normalizer =
-                            new EvaluatingNormalizer(functions, RowGranularity.NODE, new NodeSysReferenceResolver(nodeSysExpression));
+                        new EvaluatingNormalizer(functions, RowGranularity.DOC, new NodeSysReferenceResolver(nodeSysExpression));
                     return collectPhase.normalize(normalizer, null);
             }
         }
@@ -116,8 +115,8 @@ public class MapSideDataCollectOperation {
         Executor executor = threadPool.executor(threadPoolName);
         if (executor instanceof ThreadPoolExecutor) {
             ThreadPools.runWithAvailableThreads(
-                    (ThreadPoolExecutor) executor,
-                    collectors2Runnables(shardCollectors));
+                (ThreadPoolExecutor) executor,
+                collectors2Runnables(shardCollectors));
         } else {
             // assume executor is just a wrapper to 1 thread
             for (CrateCollector collector : shardCollectors) {
