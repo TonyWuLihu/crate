@@ -66,7 +66,6 @@ public class CollectSourceResolver {
     private final ShardCollectSource shardCollectSource;
     private final CollectSource fileCollectSource;
     private final ClusterService clusterService;
-    private final CollectSource sysNodesCollectSource;
     private final CollectPhaseVisitor visitor;
     private final ProjectorSetupCollectSource tableFunctionSource;
 
@@ -87,7 +86,7 @@ public class CollectSourceResolver {
                                  TableFunctionCollectSource tableFunctionCollectSource,
                                  SingleRowSource singleRowSource,
                                  SystemCollectSource systemCollectSource,
-                                 NodeStatsCollectSource sysNodesCollectSource) {
+                                 NodeStatsCollectSource nodeStatsCollectSource) {
         this.clusterService = clusterService;
 
         ImplementationSymbolVisitor nodeImplementationSymbolVisitor = new ImplementationSymbolVisitor(functions);
@@ -105,11 +104,10 @@ public class CollectSourceResolver {
         );
         this.shardCollectSource = shardCollectSource;
         this.fileCollectSource = new ProjectorSetupCollectSource(fileCollectSource, projectorFactory);
-        this.sysNodesCollectSource = new ProjectorSetupCollectSource(sysNodesCollectSource, projectorFactory);
         this.tableFunctionSource = new ProjectorSetupCollectSource(tableFunctionCollectSource, projectorFactory);
 
         nodeDocCollectSources.put(SysClusterTableInfo.IDENT.fqn(), new ProjectorSetupCollectSource(singleRowSource, projectorFactory));
-        nodeDocCollectSources.put(SysNodesTableInfo.IDENT.fqn(), sysNodesCollectSource);
+        nodeDocCollectSources.put(SysNodesTableInfo.IDENT.fqn(), new ProjectorSetupCollectSource(nodeStatsCollectSource, projectorFactory));
 
         ProjectorSetupCollectSource sysSource = new ProjectorSetupCollectSource(systemCollectSource, projectorFactory);
         for (TableInfo tableInfo : sysSchemaInfo) {
@@ -155,10 +153,6 @@ public class CollectSourceResolver {
             Map<String, List<Integer>> indexShards = locations.get(localNodeId);
             if (indexShards == null) {
                 throw new IllegalStateException("Can't resolve CollectService for collectPhase: " + phase);
-            }
-            if (indexShards.size() == 0) {
-                // select * from sys.nodes
-                return sysNodesCollectSource;
             }
 
             String indexName = Iterables.getFirst(indexShards.keySet(), null);
