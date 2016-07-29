@@ -67,7 +67,7 @@ public class MapSideDataCollectOperation {
         this.collectSourceResolver = collectSourceResolver;
         this.threadPool = threadPool;
 
-        clusterNormalizer = new EvaluatingNormalizer(functions, RowGranularity.CLUSTER, clusterReferenceResolver);
+        clusterNormalizer = new EvaluatingNormalizer(functions, RowGranularity.DOC, clusterReferenceResolver);
     }
 
     /**
@@ -103,7 +103,7 @@ public class MapSideDataCollectOperation {
                 case NODE:
                 case DOC:
                     EvaluatingNormalizer normalizer =
-                        new EvaluatingNormalizer(functions, RowGranularity.DOC, new NodeSysReferenceResolver(nodeSysExpression));
+                        new EvaluatingNormalizer(functions, RowGranularity.NODE, new NodeSysReferenceResolver(nodeSysExpression));
                     return collectPhase.normalize(normalizer, null);
             }
         }
