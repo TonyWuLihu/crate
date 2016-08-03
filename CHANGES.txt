@@ -5,6 +5,10 @@ Changes for Crate
 Unreleased
 ==========
 
+ - Made `sys.nodes` queries resilient. In case if one of the nodes is not
+   responding, the `id` and `name` fields of the `sys.nodes` table is still
+   evaluated for that node.
+
  - Fixed a race condition which could cause select statements to get stuck
 
  - Fixed an issue which prevents java client from running explain

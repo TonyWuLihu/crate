@@ -126,13 +126,13 @@ public class Version {
         return id;
     }
 
-    public static Version fromStream(StreamInput in) throws IOException {
+    public static Version readVersion(StreamInput in) throws IOException {
         return new Version(in.readVInt(),
                            in.readBoolean(),
                            org.elasticsearch.Version.readVersion(in));
     }
 
-    public static void writeVersion(Version version, StreamOutput out) throws IOException {
+    public static void writeVersionTo(Version version, StreamOutput out) throws IOException {
         out.writeVInt(version.id);
         out.writeBoolean(version.snapshot);
         org.elasticsearch.Version.writeVersion(version.esVersion, out);

@@ -99,8 +99,7 @@ public class DiscoveryNodeContextFieldResolver {
         return context;
     }
 
-
-    private Map<ColumnIdent, Consumer<DiscoveryNodeContext>> columnIdentToContext =
+    private final Map<ColumnIdent, Consumer<DiscoveryNodeContext>> columnIdentToContext =
         ImmutableMap.<ColumnIdent, Consumer<DiscoveryNodeContext>>builder()
             .put(SysNodesTableInfo.Columns.ID, new Consumer<DiscoveryNodeContext>() {
                 @Override

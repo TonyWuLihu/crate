@@ -81,7 +81,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("ALL")
 public class SysNodesExpressionsTest extends CrateUnitTest {
 
     private static final Settings NODE_SETTINGS = Settings.builder()
@@ -95,7 +94,7 @@ public class SysNodesExpressionsTest extends CrateUnitTest {
 
         private final boolean isDataNode;
 
-        public TestModule(boolean isDataNode) {
+        TestModule(boolean isDataNode) {
             this.isDataNode = isDataNode;
         }
 
@@ -262,15 +261,15 @@ public class SysNodesExpressionsTest extends CrateUnitTest {
     @Test
     public void testName() throws Exception {
         ReferenceInfo refInfo = refInfo("sys.nodes.name", DataTypes.STRING, RowGranularity.NODE);
-        SimpleObjectExpression<String> name =
-            (SimpleObjectExpression<String>) resolver.getChildImplementation(refInfo.ident().columnIdent().name());
+        @SuppressWarnings("unchecked") SimpleObjectExpression<BytesRef> name =
+            (SimpleObjectExpression<BytesRef>) resolver.getChildImplementation(refInfo.ident().columnIdent().name());
         assertEquals(new BytesRef("node 1"), name.value());
     }
 
     @Test
     public void testId() throws Exception {
         ReferenceInfo refInfo = refInfo("sys.nodes.id", DataTypes.STRING, RowGranularity.NODE);
-        SimpleObjectExpression<BytesRef> id =
+        @SuppressWarnings("unchecked") SimpleObjectExpression<BytesRef> id =
             (SimpleObjectExpression<BytesRef>) resolver.getChildImplementation(refInfo.ident().columnIdent().name());
         assertEquals(new BytesRef("node-id-1"), id.value());
     }
@@ -278,7 +277,7 @@ public class SysNodesExpressionsTest extends CrateUnitTest {
     @Test
     public void testHostname() throws Exception {
         ReferenceInfo refInfo = refInfo("sys.nodes.hostname", DataTypes.STRING, RowGranularity.NODE);
-        SimpleObjectExpression<BytesRef> expression =
+        @SuppressWarnings("unchecked") SimpleObjectExpression<BytesRef> expression =
             (SimpleObjectExpression) resolver.getChildImplementation(refInfo.ident().columnIdent().name());
         BytesRef hostname = expression.value();
         assertThat(hostname, notNullValue());
@@ -288,9 +287,9 @@ public class SysNodesExpressionsTest extends CrateUnitTest {
     @Test
     public void testRestUrl() throws Exception {
         ReferenceInfo refInfo = refInfo("sys.nodes.rest_url", DataTypes.STRING, RowGranularity.NODE);
-        SimpleObjectExpression<BytesRef> http_addr =
+        @SuppressWarnings("unchecked") SimpleObjectExpression<BytesRef> httpAddr =
             (SimpleObjectExpression<BytesRef>) resolver.getChildImplementation(refInfo.ident().columnIdent().name());
-        assertEquals(new BytesRef("http://localhost:44200"), http_addr.value());
+        assertEquals(new BytesRef("http://localhost:44200"), httpAddr.value());
     }
 
     @Test
@@ -332,6 +331,7 @@ public class SysNodesExpressionsTest extends CrateUnitTest {
         assertEquals(0L, v.get("free"));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testFs() throws Exception {
         ReferenceInfo refInfo = refInfo("sys.nodes.fs", DataTypes.STRING, RowGranularity.NODE);

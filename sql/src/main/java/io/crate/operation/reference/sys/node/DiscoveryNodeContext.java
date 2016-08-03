@@ -94,10 +94,6 @@ public class DiscoveryNodeContext implements Streamable {
         }
     }
 
-    public DiscoveryNodeContext() {
-        this(true);
-    }
-
     public boolean isComplete() {
         return complete;
     }
@@ -263,8 +259,8 @@ public class DiscoveryNodeContext implements Streamable {
         id = DataTypes.STRING.readValueFrom(in);
         name = DataTypes.STRING.readValueFrom(in);
         hostname = DataTypes.STRING.readValueFrom(in);
-        version = in.readBoolean() ? Version.fromStream(in) : null;
-        build = in.readBoolean() ? Build.fromStream(in) : null;
+        version = in.readBoolean() ? Version.readVersion(in) : null;
+        build = in.readBoolean() ? Build.readBuild(in) : null;
         restUrl = DataTypes.STRING.readValueFrom(in);
         if (in.readBoolean()) {
             int size = in.readVInt();
@@ -301,11 +297,11 @@ public class DiscoveryNodeContext implements Streamable {
         DataTypes.STRING.writeValueTo(out, hostname);
         out.writeBoolean(version != null);
         if (version != null) {
-            Version.writeVersion(version, out);
+            Version.writeVersionTo(version, out);
         }
         out.writeBoolean(build != null);
         if (build != null) {
-            Build.writeBuild(build, out);
+            Build.writeBuildTo(build, out);
         }
         DataTypes.STRING.writeValueTo(out, restUrl);
         out.writeBoolean(port != null);

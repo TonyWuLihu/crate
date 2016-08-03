@@ -22,6 +22,7 @@
 
 package io.crate.integrationtests;
 
+import com.google.common.collect.Sets;
 import io.crate.action.sql.SQLAction;
 import io.crate.action.sql.SQLRequest;
 import io.crate.testing.SQLTransportExecutor;
@@ -31,10 +32,7 @@ import org.elasticsearch.test.disruption.NetworkPartition;
 import org.elasticsearch.test.disruption.NetworkUnresponsivePartition;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 
@@ -49,16 +47,19 @@ public class SysNodeResiliencyIntegrationTest extends SQLTransportIntegrationTes
     public void testTimingOutNode() throws Exception {
         final List<String> nodes = Arrays.asList(internalCluster().getNodeNames());
         final String unluckyNode = randomFrom(nodes);
-        Set<String> luckyNodes = new HashSet<>(nodes);
+        final Set<String> luckyNodes = new HashSet<>(nodes);
         luckyNodes.remove(unluckyNode);
 
-        NetworkPartition partition = new NetworkUnresponsivePartition(luckyNodes, new HashSet<>(Arrays.asList(unluckyNode)), getRandom());
+        NetworkPartition partition
+            = new NetworkUnresponsivePartition(luckyNodes, Sets.newHashSet(unluckyNode), getRandom());
         setDisruptionScheme(partition);
         partition.startDisrupting();
 
         SQLRequest request = new SQLRequest("select version, hostname, id, name from sys.nodes where name = ?", new Object[]{unluckyNode});
-        response = internalCluster().client(randomFrom(luckyNodes.toArray(Strings.EMPTY_ARRAY))).execute(SQLAction.INSTANCE, request)
-                .actionGet(SQLTransportExecutor.REQUEST_TIMEOUT);
+        Client client = internalCluster().client(randomFrom(luckyNodes.toArray(Strings.EMPTY_ARRAY)));
+        assert client != null;
+        response = client.execute(SQLAction.INSTANCE, request).actionGet(SQLTransportExecutor.REQUEST_TIMEOUT);
+
         assertThat(response.rowCount(), is(1L));
         assertThat(response.rows()[0][0], is(nullValue()));
         assertThat(response.rows()[0][1], is(nullValue()));

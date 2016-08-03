@@ -81,13 +81,13 @@ public class Build {
         return timestamp;
     }
 
-    public static void writeBuild(Build build, StreamOutput out) throws IOException {
+    public static void writeBuildTo(Build build, StreamOutput out) throws IOException {
         out.writeString(build.hash());
         out.writeString(build.hashShort());
         out.writeString(build.timestamp());
     }
 
-    public static Build fromStream(StreamInput in) throws IOException {
+    public static Build readBuild(StreamInput in) throws IOException {
         return new Build(in.readString(), in.readString(), in.readString());
     }
 }

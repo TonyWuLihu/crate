@@ -22,7 +22,6 @@
 
 package io.crate.operation.reference.sys.node;
 
-
 import com.google.common.collect.Lists;
 import io.crate.monitor.ThreadPools;
 
@@ -31,8 +30,16 @@ import java.util.List;
 import java.util.Map;
 
 
-public class NodeThreadPoolsExpression
-        extends ArrayTypeRowContextCollectorExpression<DiscoveryNodeContext, Map.Entry<String, ThreadPools.ThreadPoolExecutorContext>, Object> {
+class NodeThreadPoolsExpression
+    extends ArrayTypeRowContextCollectorExpression<DiscoveryNodeContext, Map.Entry<String, ThreadPools.ThreadPoolExecutorContext>, Object> {
+
+    private static final String POOL_NAME = "name";
+    private static final String ACTIVE = "active";
+    private static final String REJECTED = "rejected";
+    private static final String LARGEST = "largest";
+    private static final String COMPLETED = "completed";
+    private static final String THREADS = "threads";
+    private static final String QUEUE = "queue";
 
     NodeThreadPoolsExpression() {
     }
@@ -45,13 +52,13 @@ public class NodeThreadPoolsExpression
     @Override
     protected Object valueForItem(final Map.Entry<String, ThreadPools.ThreadPoolExecutorContext> input) {
         return new HashMap<String, Object>() {{
-            put(NodeThreadPoolExpression.POOL_NAME, input.getKey());
-            put(NodeThreadPoolExpression.ACTIVE, input.getValue().activeCount());
-            put(NodeThreadPoolExpression.COMPLETED, input.getValue().completedTaskCount());
-            put(NodeThreadPoolExpression.REJECTED, input.getValue().rejectedCount());
-            put(NodeThreadPoolExpression.LARGEST, input.getValue().largestPoolSize());
-            put(NodeThreadPoolExpression.QUEUE, input.getValue().queueSize());
-            put(NodeThreadPoolExpression.THREADS, input.getValue().poolSize());
+            put(POOL_NAME, input.getKey());
+            put(ACTIVE, input.getValue().activeCount());
+            put(COMPLETED, input.getValue().completedTaskCount());
+            put(REJECTED, input.getValue().rejectedCount());
+            put(LARGEST, input.getValue().largestPoolSize());
+            put(QUEUE, input.getValue().queueSize());
+            put(THREADS, input.getValue().poolSize());
         }};
     }
 
@@ -59,5 +66,4 @@ public class NodeThreadPoolsExpression
     public Object[] value() {
         return row.isComplete() ? super.value() : null;
     }
-
 }

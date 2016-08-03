@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 
-public abstract class ArrayTypeRowContextCollectorExpression<RowType, IterType, ReturnType>
+abstract class ArrayTypeRowContextCollectorExpression<RowType, IterType, ReturnType>
     extends RowContextCollectorExpression<RowType, ReturnType[]> {
 
     protected abstract List<IterType> items();
