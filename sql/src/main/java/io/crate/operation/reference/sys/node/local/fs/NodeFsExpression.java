@@ -23,9 +23,9 @@
 package io.crate.operation.reference.sys.node.local.fs;
 
 import io.crate.monitor.ExtendedFsStats;
-import io.crate.operation.reference.sys.node.local.SysNodeObjectReference;
+import io.crate.operation.reference.NestedObjectExpression;
 
-public class NodeFsExpression extends SysNodeObjectReference {
+public class NodeFsExpression extends NestedObjectExpression {
 
     private static final String FS_TOTAL = "total";
     private static final String FS_DISKS = "disks";
@@ -36,5 +36,4 @@ public class NodeFsExpression extends SysNodeObjectReference {
         childImplementations.put(FS_DISKS, new NodeFsDisksExpression(fsStats));
         childImplementations.put(FS_DATA, new NodeFsDataExpression(fsStats));
     }
-
 }

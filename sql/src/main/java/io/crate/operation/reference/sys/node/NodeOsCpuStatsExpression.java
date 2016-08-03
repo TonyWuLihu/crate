@@ -24,10 +24,7 @@ package io.crate.operation.reference.sys.node;
 
 import io.crate.monitor.ExtendedOsStats;
 
-class NodeOsCpuExpression extends NestedDiscoveryNodeExpression {
-
-    private abstract class CpuExpression extends SimpleDiscoveryNodeExpression<Short> {
-    }
+class NodeOsCpuStatsExpression extends NestedNodeStatsExpression {
 
     private static final String SYS = "system";
     private static final String USER = "user";
@@ -35,8 +32,8 @@ class NodeOsCpuExpression extends NestedDiscoveryNodeExpression {
     private static final String USAGE = "used";
     private static final String STOLEN = "stolen";
 
-    NodeOsCpuExpression() {
-        childImplementations.put(SYS, new CpuExpression() {
+    NodeOsCpuStatsExpression() {
+        childImplementations.put(SYS, new SimpleNodeStatsExpression<Short>() {
             @Override
             public Short innerValue() {
                 ExtendedOsStats.Cpu cpu = this.row.extendedOsStats().cpu();
@@ -47,7 +44,7 @@ class NodeOsCpuExpression extends NestedDiscoveryNodeExpression {
                 }
             }
         });
-        childImplementations.put(USER, new CpuExpression() {
+        childImplementations.put(USER, new SimpleNodeStatsExpression<Short>() {
             @Override
             public Short innerValue() {
                 ExtendedOsStats.Cpu cpu = this.row.extendedOsStats().cpu();
@@ -58,7 +55,7 @@ class NodeOsCpuExpression extends NestedDiscoveryNodeExpression {
                 }
             }
         });
-        childImplementations.put(IDLE, new CpuExpression() {
+        childImplementations.put(IDLE, new SimpleNodeStatsExpression<Short>() {
             @Override
             public Short innerValue() {
                 ExtendedOsStats.Cpu cpu = this.row.extendedOsStats().cpu();
@@ -69,7 +66,7 @@ class NodeOsCpuExpression extends NestedDiscoveryNodeExpression {
                 }
             }
         });
-        childImplementations.put(USAGE, new CpuExpression() {
+        childImplementations.put(USAGE, new SimpleNodeStatsExpression<Short>() {
             @Override
             public Short innerValue() {
                 ExtendedOsStats.Cpu cpu = this.row.extendedOsStats().cpu();
@@ -80,7 +77,7 @@ class NodeOsCpuExpression extends NestedDiscoveryNodeExpression {
                 }
             }
         });
-        childImplementations.put(STOLEN, new CpuExpression() {
+        childImplementations.put(STOLEN, new SimpleNodeStatsExpression<Short>() {
             @Override
             public Short innerValue() {
                 ExtendedOsStats.Cpu cpu = this.row.extendedOsStats().cpu();

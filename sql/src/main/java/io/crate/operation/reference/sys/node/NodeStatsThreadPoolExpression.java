@@ -20,14 +20,23 @@
  * agreement.
  */
 
-package io.crate.operation.reference.sys.node.local;
+package io.crate.operation.reference.sys.node;
 
-import io.crate.operation.reference.NestedObjectExpression;
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import com.google.common.collect.Lists;
+import io.crate.monitor.ThreadPools;
 
-public abstract class SysNodeObjectReference extends NestedObjectExpression {
+import java.util.List;
+import java.util.Map;
 
-    protected abstract class ChildExpression<T> extends SysNodeExpression<T> {
 
+abstract class NodeStatsThreadPoolExpression<R>
+        extends NodeStatsArrayTypeExpression<Map.Entry<String, ThreadPools.ThreadPoolExecutorContext>, R> {
+
+    NodeStatsThreadPoolExpression() {
+    }
+
+    @Override
+    protected List<Map.Entry<String, ThreadPools.ThreadPoolExecutorContext>> items() {
+        return Lists.newArrayList(this.row.threadPools());
     }
 }

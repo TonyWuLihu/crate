@@ -24,10 +24,7 @@ package io.crate.operation.reference.sys.node;
 
 import org.elasticsearch.monitor.os.OsStats;
 
-class NodeMemoryExpression extends NestedDiscoveryNodeExpression {
-
-    abstract class MemoryExpression extends SimpleDiscoveryNodeExpression<Object> {
-    }
+class NodeMemoryStatsExpression extends NestedNodeStatsExpression {
 
     private static final String FREE = "free";
     private static final String USED = "used";
@@ -35,8 +32,8 @@ class NodeMemoryExpression extends NestedDiscoveryNodeExpression {
     private static final String USED_PERCENT = "used_percent";
     private static final String PROBE_TIMESTAMP = "probe_timestamp";
 
-    NodeMemoryExpression() {
-        childImplementations.put(FREE, new MemoryExpression() {
+    NodeMemoryStatsExpression() {
+        childImplementations.put(FREE, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
                 OsStats.Mem mem = this.row.osStats().getMem();
@@ -46,7 +43,7 @@ class NodeMemoryExpression extends NestedDiscoveryNodeExpression {
                 return -1L;
             }
         });
-        childImplementations.put(USED, new MemoryExpression() {
+        childImplementations.put(USED, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
                 OsStats.Mem mem = this.row.osStats().getMem();
@@ -56,7 +53,7 @@ class NodeMemoryExpression extends NestedDiscoveryNodeExpression {
                 return -1L;
             }
         });
-        childImplementations.put(FREE_PERCENT, new MemoryExpression() {
+        childImplementations.put(FREE_PERCENT, new SimpleNodeStatsExpression<Short>() {
             @Override
             public Short innerValue() {
                 OsStats.Mem mem = this.row.osStats().getMem();
@@ -66,7 +63,7 @@ class NodeMemoryExpression extends NestedDiscoveryNodeExpression {
                 return -1;
             }
         });
-        childImplementations.put(USED_PERCENT, new MemoryExpression() {
+        childImplementations.put(USED_PERCENT, new SimpleNodeStatsExpression<Short>() {
             @Override
             public Short innerValue() {
                 OsStats.Mem mem = this.row.osStats().getMem();
@@ -76,12 +73,11 @@ class NodeMemoryExpression extends NestedDiscoveryNodeExpression {
                 return -1;
             }
         });
-        childImplementations.put(PROBE_TIMESTAMP, new SimpleDiscoveryNodeExpression<Long>() {
+        childImplementations.put(PROBE_TIMESTAMP, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
                 return this.row.osStats().getTimestamp();
             }
         });
     }
-
 }

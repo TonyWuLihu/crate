@@ -24,39 +24,36 @@ package io.crate.operation.reference.sys.node;
 
 import org.elasticsearch.monitor.jvm.JvmStats;
 
-class NodeHeapExpression extends NestedDiscoveryNodeExpression {
-
-    abstract class HeapExpression extends SimpleDiscoveryNodeExpression<Long> {
-    }
+class NodeHeapStatsExpression extends NestedNodeStatsExpression {
 
     private static final String MAX = "max";
     private static final String FREE = "free";
     private static final String USED = "used";
     private static final String PROBE_TIMESTAMP = "probe_timestamp";
 
-    NodeHeapExpression() {
-        childImplementations.put(FREE, new HeapExpression() {
+    NodeHeapStatsExpression() {
+        childImplementations.put(FREE, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
                 JvmStats stats = this.row.jvmStats();
                 return stats.getMem().getHeapMax().bytes() - stats.getMem().getHeapUsed().bytes();
             }
         });
-        childImplementations.put(USED, new HeapExpression() {
+        childImplementations.put(USED, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
                 JvmStats stats = this.row.jvmStats();
                 return stats.getMem().getHeapUsed().bytes();
             }
         });
-        childImplementations.put(MAX, new HeapExpression() {
+        childImplementations.put(MAX, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
                 JvmStats stats = this.row.jvmStats();
                 return stats.getMem().getHeapMax().bytes();
             }
         });
-        childImplementations.put(PROBE_TIMESTAMP, new SimpleDiscoveryNodeExpression<Long>() {
+        childImplementations.put(PROBE_TIMESTAMP, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
                 JvmStats stats = this.row.jvmStats();
@@ -64,5 +61,4 @@ class NodeHeapExpression extends NestedDiscoveryNodeExpression {
             }
         });
     }
-
 }

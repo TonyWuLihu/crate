@@ -63,6 +63,7 @@ public class NodeStatsCollectSource implements CollectSource {
         if (collectPhase.whereClause().noMatch()) {
             return ImmutableList.<CrateCollector>of(RowsCollector.empty(downstream));
         }
+
         return ImmutableList.<CrateCollector>of(new NodeStatsCollector(
                 transportActionProvider.transportStatTablesActionProvider(),
                 downstream,

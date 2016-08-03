@@ -36,7 +36,6 @@ import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.lucene.BytesRefs;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsModule;
-import org.elasticsearch.common.util.concurrent.XRejectedExecutionHandler;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.env.NodeEnvironmentModule;
@@ -54,8 +53,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.is;
@@ -63,7 +60,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class DiscoveryNodeContextTest extends CrateUnitTest {
+public class NodeStatsContextTest extends CrateUnitTest {
 
     private ExtendedNodeInfo extendedNodeInfo;
     private ThreadPool threadPool;
@@ -100,7 +97,7 @@ public class DiscoveryNodeContextTest extends CrateUnitTest {
 
     @Test
     public void testStreamContext() throws Exception {
-        DiscoveryNodeContext ctx1 = new DiscoveryNodeContext(true);
+        NodeStatsContext ctx1 = new NodeStatsContext(true);
         ctx1.id(BytesRefs.toBytesRef("93c7ff92-52fa-11e6-aad8-3c15c2d3ad18"));
         ctx1.name(BytesRefs.toBytesRef("crate1"));
         ctx1.hostname(BytesRefs.toBytesRef("crate1.example.com"));
@@ -121,7 +118,7 @@ public class DiscoveryNodeContextTest extends CrateUnitTest {
         ctx1.networkStats(extendedNodeInfo.networkStats());
         ctx1.extendedProcessCpuStats(extendedNodeInfo.processCpuStats());
         ctx1.extendedFsStats(extendedNodeInfo.fsStats());
-        ctx1.threadPools(threadPoolInfo());
+        ctx1.threadPools(ThreadPools.newInstance(threadPool));
 
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
         StreamOutput out = new OutputStreamStreamOutput(outBuffer);
@@ -129,7 +126,7 @@ public class DiscoveryNodeContextTest extends CrateUnitTest {
 
         ByteArrayInputStream inBuffer = new ByteArrayInputStream(outBuffer.toByteArray());
         InputStreamStreamInput in = new InputStreamStreamInput(inBuffer);
-        DiscoveryNodeContext ctx2 = new DiscoveryNodeContext(true);
+        NodeStatsContext ctx2 = new NodeStatsContext(true);
         ctx2.readFrom(in);
 
         assertEquals(ctx1.id(), ctx2.id());
@@ -150,38 +147,16 @@ public class DiscoveryNodeContextTest extends CrateUnitTest {
         assertEquals(ctx1.threadPools(), ctx2.threadPools());
     }
 
-    private ThreadPools threadPoolInfo() {
-        ThreadPools pools = new ThreadPools();
-        for (ThreadPool.Info info : threadPool.info()) {
-            ThreadPoolExecutor executor = (ThreadPoolExecutor) threadPool.executor(info.getName());
-            long rejected = -1;
-            RejectedExecutionHandler rejectedExecutionHandler = executor.getRejectedExecutionHandler();
-            if (rejectedExecutionHandler instanceof XRejectedExecutionHandler) {
-                rejected = ((XRejectedExecutionHandler) rejectedExecutionHandler).rejected();
-            }
-            ThreadPools.ThreadPoolExecutorContext ctx = new ThreadPools.ThreadPoolExecutorContext(
-                executor.getQueue().size(),
-                executor.getActiveCount(),
-                executor.getLargestPoolSize(),
-                executor.getPoolSize(),
-                executor.getCompletedTaskCount(),
-                rejected
-            );
-            pools.add(info.getName(), ctx);
-        }
-        return pools;
-    }
-
     @Test
     public void testStreamEmptyContext() throws Exception {
-        DiscoveryNodeContext ctx1 = new DiscoveryNodeContext(false);
+        NodeStatsContext ctx1 = new NodeStatsContext(false);
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
         StreamOutput out = new OutputStreamStreamOutput(outBuffer);
         ctx1.writeTo(out);
 
         ByteArrayInputStream inBuffer = new ByteArrayInputStream(outBuffer.toByteArray());
         InputStreamStreamInput in = new InputStreamStreamInput(inBuffer);
-        DiscoveryNodeContext ctx2 = new DiscoveryNodeContext(false);
+        NodeStatsContext ctx2 = new NodeStatsContext(false);
         ctx2.readFrom(in);
 
         assertNull(ctx2.id());
@@ -202,7 +177,7 @@ public class DiscoveryNodeContextTest extends CrateUnitTest {
 
     @Test
     public void testStreamThreadPools() throws Exception {
-        ThreadPools pools1 = new ThreadPools();
+        ThreadPools pools1 = ThreadPools.newInstance();
         int size = 3;
         for (int i = 0; i < size; i++) {
             ThreadPools.ThreadPoolExecutorContext ctx = new ThreadPools.ThreadPoolExecutorContext(
@@ -221,7 +196,7 @@ public class DiscoveryNodeContextTest extends CrateUnitTest {
 
         ByteArrayInputStream inBuffer = new ByteArrayInputStream(outBuffer.toByteArray());
         InputStreamStreamInput in = new InputStreamStreamInput(inBuffer);
-        ThreadPools pools2 = new ThreadPools();
+        ThreadPools pools2 = ThreadPools.newInstance();
         pools2.readFrom(in);
 
         assertEquals(pools1, pools2);
@@ -246,7 +221,7 @@ public class DiscoveryNodeContextTest extends CrateUnitTest {
 
     @Test
     public void testStreamContextWithNullPorts() throws Exception {
-        DiscoveryNodeContext ctx1 = new DiscoveryNodeContext(false);
+        NodeStatsContext ctx1 = new NodeStatsContext(false);
         ctx1.port(new HashMap<String, Integer>() {{
             put("http", null);
             put("transport", 4300);
@@ -257,7 +232,7 @@ public class DiscoveryNodeContextTest extends CrateUnitTest {
 
         ByteArrayInputStream inBuffer = new ByteArrayInputStream(outBuffer.toByteArray());
         InputStreamStreamInput in = new InputStreamStreamInput(inBuffer);
-        DiscoveryNodeContext ctx2 = new DiscoveryNodeContext(false);
+        NodeStatsContext ctx2 = new NodeStatsContext(false);
         ctx2.readFrom(in);
 
         assertThat(ctx2.port().get("http"), nullValue());

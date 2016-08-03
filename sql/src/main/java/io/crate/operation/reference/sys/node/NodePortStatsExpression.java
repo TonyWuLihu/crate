@@ -22,14 +22,23 @@
 
 package io.crate.operation.reference.sys.node;
 
-import io.crate.metadata.RowContextCollectorExpression;
+class NodePortStatsExpression extends NestedNodeStatsExpression {
 
-public abstract class SimpleDiscoveryNodeExpression<R> extends RowContextCollectorExpression<DiscoveryNodeContext, R> {
+    private static final String HTTP = "http";
+    private static final String TRANSPORT = "transport";
 
-    @Override
-    public R value() {
-        return row.isComplete() ? innerValue() : null;
+    NodePortStatsExpression() {
+        childImplementations.put(HTTP, new SimpleNodeStatsExpression<Integer>() {
+            @Override
+            public Integer innerValue() {
+                return this.row.port().get("http");
+            }
+        });
+        childImplementations.put(TRANSPORT, new SimpleNodeStatsExpression<Integer>() {
+            @Override
+            public Integer innerValue() {
+                return this.row.port().get("transport");
+            }
+        });
     }
-
-    public abstract R innerValue();
 }

@@ -22,53 +22,47 @@
 
 package io.crate.operation.reference.sys.node;
 
-import org.elasticsearch.monitor.process.ProcessStats;
+import io.crate.monitor.ExtendedProcessCpuStats;
 
+class NodeProcessCpuStatsExpression extends NestedNodeStatsExpression {
 
-class NodeProcessExpression extends NestedDiscoveryNodeExpression {
+    private static final String PERCENT = "percent";
+    private static final String USER = "user";
+    private static final String SYSTEM = "system";
 
-    private static final String OPEN_FILE_DESCRIPTORS = "open_file_descriptors";
-    private static final String MAX_OPEN_FILE_DESCRIPTORS = "max_open_file_descriptors";
-    private static final String PROBE_TIMESTAMP = "probe_timestamp";
-    private static final String CPU = "cpu";
-
-    private abstract class ProcessExpression extends SimpleDiscoveryNodeExpression<Long> {
-    }
-
-    NodeProcessExpression() {
-        childImplementations.put(OPEN_FILE_DESCRIPTORS, new ProcessExpression() {
+    NodeProcessCpuStatsExpression() {
+        childImplementations.put(PERCENT, new SimpleNodeStatsExpression<Short>() {
+            @Override
+            public Short innerValue() {
+                ExtendedProcessCpuStats cpuStats = this.row.extendedProcessCpuStats();
+                if (cpuStats != null) {
+                    return cpuStats.percent();
+                } else {
+                    return -1;
+                }
+            }
+        });
+        childImplementations.put(USER, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
-                ProcessStats processStats = this.row.processStats();
-                if (processStats != null) {
-                    return processStats.getOpenFileDescriptors();
+                ExtendedProcessCpuStats cpuStats = this.row.extendedProcessCpuStats();
+                if (cpuStats != null) {
+                    return cpuStats.user().millis();
                 } else {
                     return -1L;
                 }
             }
         });
-        childImplementations.put(MAX_OPEN_FILE_DESCRIPTORS, new ProcessExpression() {
+        childImplementations.put(SYSTEM, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
-                ProcessStats processStats = this.row.processStats();
-                if (processStats != null) {
-                    return processStats.getMaxFileDescriptors();
+                ExtendedProcessCpuStats cpuStats = this.row.extendedProcessCpuStats();
+                if (cpuStats != null) {
+                    return cpuStats.sys().millis();
                 } else {
                     return -1L;
                 }
             }
         });
-        childImplementations.put(PROBE_TIMESTAMP, new ProcessExpression() {
-            @Override
-            public Long innerValue() {
-                ProcessStats processStats = this.row.processStats();
-                if (processStats != null) {
-                    return processStats.getTimestamp();
-                } else {
-                    return -1L;
-                }
-            }
-        });
-        childImplementations.put(CPU, new NodeProcessCpuExpression());
     }
 }

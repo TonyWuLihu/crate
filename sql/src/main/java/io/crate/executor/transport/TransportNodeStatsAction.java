@@ -22,8 +22,8 @@
 
 package io.crate.executor.transport;
 
-import io.crate.operation.reference.sys.node.DiscoveryNodeContext;
-import io.crate.operation.reference.sys.node.DiscoveryNodeContextFieldResolver;
+import io.crate.operation.reference.sys.node.NodeStatsContext;
+import io.crate.operation.reference.sys.node.NodeStatsContextFieldResolver;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.inject.Singleton;
@@ -35,15 +35,15 @@ import org.elasticsearch.transport.TransportService;
 @Singleton
 public class TransportNodeStatsAction implements NodeAction<NodeStatsRequest, NodeStatsResponse> {
 
-    public static final String ACTION_NAME = "crate/sql/sys/nodes";
+    private static final String ACTION_NAME = "crate/sql/sys/nodes";
     private static final String EXECUTOR = ThreadPool.Names.PERCOLATE;
 
-    private DiscoveryNodeContextFieldResolver nodeContextFieldsResolver;
+    private final NodeStatsContextFieldResolver nodeContextFieldsResolver;
     private final Transports transports;
 
     @Inject
     public TransportNodeStatsAction(TransportService transportService,
-                                    DiscoveryNodeContextFieldResolver nodeContextFieldsResolver,
+                                    NodeStatsContextFieldResolver nodeContextFieldsResolver,
                                     Transports transports) {
         this.nodeContextFieldsResolver = nodeContextFieldsResolver;
         this.transports = transports;
@@ -75,7 +75,7 @@ public class TransportNodeStatsAction implements NodeAction<NodeStatsRequest, No
     @Override
     public void nodeOperation(NodeStatsRequest request, ActionListener<NodeStatsResponse> listener) {
         try {
-            DiscoveryNodeContext context = nodeContextFieldsResolver.resolveForColumnIdents(request.referenceIdents());
+            NodeStatsContext context = nodeContextFieldsResolver.forColumns(request.columnIdents());
             listener.onResponse(new NodeStatsResponse(context));
         } catch (Throwable t) {
             listener.onFailure(t);

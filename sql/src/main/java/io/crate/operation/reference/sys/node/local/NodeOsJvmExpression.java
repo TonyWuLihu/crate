@@ -22,53 +22,55 @@
 
 package io.crate.operation.reference.sys.node.local;
 
+import io.crate.metadata.SimpleObjectExpression;
+import io.crate.operation.reference.NestedObjectExpression;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Constants;
 import org.elasticsearch.common.lucene.BytesRefs;
 
-class NodeOsJvmExpression extends SysNodeObjectReference {
+class NodeOsJvmExpression extends NestedObjectExpression {
 
     private static final String VERSION = "version";
     private static final String VM_NAME = "vm_name";
     private static final String VM_VENDOR = "vm_vendor";
     private static final String VM_VERSION = "vm_version";
 
-    private static final BytesRef JAVA_VERSION = BytesRefs.toBytesRef(Constants.JAVA_VERSION);
-    private static final BytesRef JVM_NAME = BytesRefs.toBytesRef(Constants.JVM_NAME);
-    private static final BytesRef JVM_VENDOR = BytesRefs.toBytesRef(Constants.JVM_VENDOR);
-    private static final BytesRef JVM_VERSION = BytesRefs.toBytesRef(Constants.JVM_VERSION);
+    private static final SimpleObjectExpression<BytesRef> JAVA_VERSION_EXR = new SimpleObjectExpression<BytesRef>() {
+        @Override
+        public BytesRef value() {
+            return BytesRefs.toBytesRef(Constants.JAVA_VERSION);
+        }
+    };
 
-    abstract class JvmExpression extends SysNodeExpression<Object> {
-    }
+    private static final SimpleObjectExpression<BytesRef> JVM_NAME_EXPR = new SimpleObjectExpression<BytesRef>() {
+        @Override
+        public BytesRef value() {
+            return BytesRefs.toBytesRef(Constants.JVM_NAME);
+        }
+    };
+
+    private static final SimpleObjectExpression<BytesRef> JVM_VENDOR_EXPR = new SimpleObjectExpression<BytesRef>() {
+        @Override
+        public BytesRef value() {
+            return BytesRefs.toBytesRef(Constants.JVM_VENDOR);
+        }
+    };
+
+    private static final SimpleObjectExpression<BytesRef> JVM_VERSION_EXPR = new SimpleObjectExpression<BytesRef>() {
+        @Override
+        public BytesRef value() {
+            return BytesRefs.toBytesRef(Constants.JVM_VERSION);
+        }
+    };
 
     NodeOsJvmExpression() {
         addChildImplementations();
     }
 
     private void addChildImplementations() {
-        childImplementations.put(VERSION, new JvmExpression() {
-            @Override
-            public BytesRef value() {
-                return JAVA_VERSION;
-            }
-        });
-        childImplementations.put(VM_NAME, new JvmExpression() {
-            @Override
-            public BytesRef value() {
-                return JVM_NAME;
-            }
-        });
-        childImplementations.put(VM_VENDOR, new JvmExpression() {
-            @Override
-            public BytesRef value() {
-                return JVM_VENDOR;
-            }
-        });
-        childImplementations.put(VM_VERSION, new JvmExpression() {
-            @Override
-            public BytesRef value() {
-                return JVM_VERSION;
-            }
-        });
+        childImplementations.put(VERSION, JAVA_VERSION_EXR);
+        childImplementations.put(VM_NAME, JVM_NAME_EXPR);
+        childImplementations.put(VM_VENDOR, JVM_VENDOR_EXPR);
+        childImplementations.put(VM_VERSION, JVM_VERSION_EXPR);
     }
 }

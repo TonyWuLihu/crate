@@ -31,7 +31,7 @@ import io.crate.monitor.DummyExtendedNodeInfo;
 import io.crate.monitor.ExtendedNodeInfo;
 import io.crate.operation.collect.CollectExpression;
 import io.crate.operation.reference.sys.RowContextReferenceResolver;
-import io.crate.operation.reference.sys.node.DiscoveryNodeContext;
+import io.crate.operation.reference.sys.node.NodeStatsContext;
 import io.crate.test.integration.CrateUnitTest;
 import io.crate.types.DataTypes;
 import org.apache.lucene.util.BytesRef;
@@ -66,7 +66,7 @@ import static org.mockito.Mockito.when;
 public class SysNodesExpressionsOnHandlerTest extends CrateUnitTest {
 
     private final RowContextReferenceResolver resolver = RowContextReferenceResolver.INSTANCE;
-    private static final DiscoveryNodeContext CONTEXT = DiscoveryNodeContext.newInstance();
+    private static final NodeStatsContext CONTEXT = NodeStatsContext.newInstance();
 
     private CollectExpression collectExpression;
 

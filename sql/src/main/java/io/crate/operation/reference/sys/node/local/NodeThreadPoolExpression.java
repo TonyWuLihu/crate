@@ -22,6 +22,8 @@
 
 package io.crate.operation.reference.sys.node.local;
 
+import io.crate.metadata.SimpleObjectExpression;
+import io.crate.operation.reference.NestedObjectExpression;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.util.concurrent.XRejectedExecutionHandler;
 import org.elasticsearch.threadpool.ThreadPool;
@@ -29,10 +31,7 @@ import org.elasticsearch.threadpool.ThreadPool;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
-class NodeThreadPoolExpression extends SysNodeObjectReference {
-
-    abstract class ThreadPoolExpression<ChildType> extends SysNodeExpression<ChildType> {
-    }
+class NodeThreadPoolExpression extends NestedObjectExpression {
 
     private static final String POOL_NAME = "name";
     private static final String ACTIVE = "active";
@@ -52,19 +51,19 @@ class NodeThreadPoolExpression extends SysNodeObjectReference {
     }
 
     private void addChildImplementations() {
-        childImplementations.put(POOL_NAME, new ThreadPoolExpression<BytesRef>() {
+        childImplementations.put(POOL_NAME, new SimpleObjectExpression<BytesRef>() {
             @Override
             public BytesRef value() {
                 return name;
             }
         });
-        childImplementations.put(ACTIVE, new ThreadPoolExpression<Integer>() {
+        childImplementations.put(ACTIVE, new SimpleObjectExpression<Integer>() {
             @Override
             public Integer value() {
                 return threadPoolExecutor.getActiveCount();
             }
         });
-        childImplementations.put(REJECTED, new ThreadPoolExpression<Long>() {
+        childImplementations.put(REJECTED, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 long rejected = -1;
@@ -75,30 +74,29 @@ class NodeThreadPoolExpression extends SysNodeObjectReference {
                 return rejected;
             }
         });
-        childImplementations.put(LARGEST, new ThreadPoolExpression<Integer>() {
+        childImplementations.put(LARGEST, new SimpleObjectExpression<Integer>() {
             @Override
             public Integer value() {
                 return threadPoolExecutor.getLargestPoolSize();
             }
         });
-        childImplementations.put(COMPLETED, new ThreadPoolExpression<Long>() {
+        childImplementations.put(COMPLETED, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 return threadPoolExecutor.getCompletedTaskCount();
             }
         });
-        childImplementations.put(THREADS, new ThreadPoolExpression<Integer>() {
+        childImplementations.put(THREADS, new SimpleObjectExpression<Integer>() {
             @Override
             public Integer value() {
                 return threadPoolExecutor.getPoolSize();
             }
         });
-        childImplementations.put(QUEUE, new ThreadPoolExpression<Integer>() {
+        childImplementations.put(QUEUE, new SimpleObjectExpression<Integer>() {
             @Override
             public Integer value() {
                 return threadPoolExecutor.getQueue().size();
             }
         });
     }
-
 }

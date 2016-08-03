@@ -22,13 +22,11 @@
 
 package io.crate.operation.reference.sys.node.local;
 
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.metadata.SimpleObjectExpression;
+import io.crate.operation.reference.NestedObjectExpression;
 import org.elasticsearch.monitor.os.OsStats;
 
-class NodeMemoryExpression extends SysNodeObjectReference {
-
-    abstract class MemoryExpression extends SysNodeExpression<Object> {
-    }
+class NodeMemoryExpression extends NestedObjectExpression {
 
     private static final String FREE = "free";
     private static final String USED = "used";
@@ -38,7 +36,7 @@ class NodeMemoryExpression extends SysNodeObjectReference {
 
     NodeMemoryExpression(final OsStats stats) {
         addChildImplementations(stats.getMem());
-        childImplementations.put(PROBE_TIMESTAMP, new SysNodeExpression<Long>() {
+        childImplementations.put(PROBE_TIMESTAMP, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 return stats.getTimestamp();
@@ -47,7 +45,7 @@ class NodeMemoryExpression extends SysNodeObjectReference {
     }
 
     private void addChildImplementations(final OsStats.Mem mem) {
-        childImplementations.put(FREE, new MemoryExpression() {
+        childImplementations.put(FREE, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 if (mem != null) {
@@ -56,7 +54,7 @@ class NodeMemoryExpression extends SysNodeObjectReference {
                 return -1L;
             }
         });
-        childImplementations.put(USED, new MemoryExpression() {
+        childImplementations.put(USED, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 if (mem != null) {
@@ -65,7 +63,7 @@ class NodeMemoryExpression extends SysNodeObjectReference {
                 return -1L;
             }
         });
-        childImplementations.put(FREE_PERCENT, new MemoryExpression() {
+        childImplementations.put(FREE_PERCENT, new SimpleObjectExpression<Short>() {
             @Override
             public Short value() {
                 if (mem != null) {
@@ -74,7 +72,7 @@ class NodeMemoryExpression extends SysNodeObjectReference {
                 return -1;
             }
         });
-        childImplementations.put(USED_PERCENT, new MemoryExpression() {
+        childImplementations.put(USED_PERCENT, new SimpleObjectExpression<Short>() {
             @Override
             public Short value() {
                 if (mem != null) {
@@ -84,5 +82,4 @@ class NodeMemoryExpression extends SysNodeObjectReference {
             }
         });
     }
-
 }

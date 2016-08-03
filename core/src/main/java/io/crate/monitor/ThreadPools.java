@@ -23,21 +23,38 @@
 package io.crate.monitor;
 
 import com.google.common.base.Objects;
-import io.crate.types.DataTypes;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.io.stream.Streamable;
+import org.elasticsearch.common.util.concurrent.XRejectedExecutionHandler;
+import org.elasticsearch.threadpool.ThreadPool;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class ThreadPools implements Streamable, Iterable<Map.Entry<String, ThreadPools.ThreadPoolExecutorContext>> {
 
-    private Map<String, ThreadPoolExecutorContext> contexts;
+    private final Map<String, ThreadPoolExecutorContext> contexts;
 
-    public ThreadPools() {
+    public static ThreadPools newInstance(ThreadPool threadPool) {
+        ThreadPools threadPools = ThreadPools.newInstance();
+        for (ThreadPool.Info info : threadPool.info()) {
+            String name = info.getName();
+            ThreadPoolExecutor executor = (ThreadPoolExecutor) threadPool.executor(name);
+            threadPools.add(name, ThreadPoolExecutorContext.newInstance(executor));
+        }
+        return threadPools;
+    }
+
+    public static ThreadPools newInstance() {
+        return new ThreadPools();
+    }
+
+    private ThreadPools() {
         this.contexts = new HashMap<>();
     }
 
@@ -48,7 +65,6 @@ public class ThreadPools implements Streamable, Iterable<Map.Entry<String, Threa
     @Override
     public void readFrom(StreamInput in) throws IOException {
         int size = in.readVInt();
-        contexts = new HashMap<>(size);
         for (int i = 0; i < size; i++) {
             String key = in.readString();
             ThreadPoolExecutorContext value = new ThreadPoolExecutorContext();
@@ -98,7 +114,6 @@ public class ThreadPools implements Streamable, Iterable<Map.Entry<String, Threa
         return threadPools;
     }
 
-
     public static class ThreadPoolExecutorContext implements Streamable {
 
         private int queueSize;
@@ -107,6 +122,24 @@ public class ThreadPools implements Streamable, Iterable<Map.Entry<String, Threa
         private int poolSize;
         private long completedTaskCount;
         private long rejectedCount;
+
+        public static ThreadPoolExecutorContext newInstance(ThreadPoolExecutor executor) {
+            long rejectedCount = -1;
+            RejectedExecutionHandler rejectedExecutionHandler = executor.getRejectedExecutionHandler();
+
+            if (rejectedExecutionHandler instanceof XRejectedExecutionHandler) {
+                rejectedCount = ((XRejectedExecutionHandler) rejectedExecutionHandler).rejected();
+            }
+
+            return new ThreadPoolExecutorContext(
+                executor.getActiveCount(),
+                executor.getQueue().size(),
+                executor.getLargestPoolSize(),
+                executor.getPoolSize(),
+                executor.getCompletedTaskCount(),
+                rejectedCount);
+
+        }
 
         public ThreadPoolExecutorContext() {}
 

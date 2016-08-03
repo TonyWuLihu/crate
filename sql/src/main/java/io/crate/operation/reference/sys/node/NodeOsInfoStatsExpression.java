@@ -24,7 +24,7 @@ package io.crate.operation.reference.sys.node;
 
 import org.apache.lucene.util.BytesRef;
 
-class NodeOsInfoExpression extends NestedDiscoveryNodeExpression {
+class NodeOsInfoStatsExpression extends NestedNodeStatsExpression {
 
     private static final String AVAILABLE_PROCESSORS = "available_processors";
     private static final String OS = "name";
@@ -32,36 +32,32 @@ class NodeOsInfoExpression extends NestedDiscoveryNodeExpression {
     private static final String VERSION = "version";
     private static final String JVM = "jvm";
 
-    private abstract class OsInfoExpression extends SimpleDiscoveryNodeExpression<Object> {
-    }
-
-    NodeOsInfoExpression() {
-        childImplementations.put(AVAILABLE_PROCESSORS, new OsInfoExpression() {
+    NodeOsInfoStatsExpression() {
+        childImplementations.put(AVAILABLE_PROCESSORS, new SimpleNodeStatsExpression<Integer>() {
             @Override
             public Integer innerValue() {
                 return this.row.osInfo().getAvailableProcessors();
             }
         });
-        childImplementations.put(OS, new OsInfoExpression() {
+        childImplementations.put(OS, new SimpleNodeStatsExpression<BytesRef>() {
             @Override
             public BytesRef innerValue() {
                 return this.row.osName();
             }
         });
-        childImplementations.put(ARCH, new OsInfoExpression() {
+        childImplementations.put(ARCH, new SimpleNodeStatsExpression<BytesRef>() {
             @Override
             public BytesRef innerValue() {
                 return this.row.osArch();
             }
         });
-        childImplementations.put(VERSION, new OsInfoExpression() {
+        childImplementations.put(VERSION, new SimpleNodeStatsExpression<BytesRef>() {
             @Override
             public BytesRef innerValue() {
                 return this.row.osVersion();
             }
         });
-        childImplementations.put(JVM, new NodeOsJvmExpression());
+        childImplementations.put(JVM, new NodeOsJvmStatsExpression());
     }
-
 }
 

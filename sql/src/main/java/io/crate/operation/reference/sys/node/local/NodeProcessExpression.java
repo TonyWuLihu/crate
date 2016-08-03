@@ -22,12 +22,12 @@
 
 package io.crate.operation.reference.sys.node.local;
 
-
+import io.crate.metadata.SimpleObjectExpression;
 import io.crate.monitor.ExtendedProcessCpuStats;
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.operation.reference.NestedObjectExpression;
 import org.elasticsearch.monitor.process.ProcessStats;
 
-class NodeProcessExpression extends SysNodeObjectReference {
+class NodeProcessExpression extends NestedObjectExpression {
 
     private static final String OPEN_FILE_DESCRIPTORS = "open_file_descriptors";
     private static final String MAX_OPEN_FILE_DESCRIPTORS = "max_open_file_descriptors";
@@ -39,7 +39,7 @@ class NodeProcessExpression extends SysNodeObjectReference {
     }
 
     private void addChildImplementations(final ProcessStats processStats, ExtendedProcessCpuStats cpuStats) {
-        childImplementations.put(OPEN_FILE_DESCRIPTORS, new SysNodeExpression<Long>() {
+        childImplementations.put(OPEN_FILE_DESCRIPTORS, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 if (processStats != null) {
@@ -49,7 +49,7 @@ class NodeProcessExpression extends SysNodeObjectReference {
                 }
             }
         });
-        childImplementations.put(MAX_OPEN_FILE_DESCRIPTORS, new SysNodeExpression<Long>() {
+        childImplementations.put(MAX_OPEN_FILE_DESCRIPTORS, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 if (processStats != null) {
@@ -59,7 +59,7 @@ class NodeProcessExpression extends SysNodeObjectReference {
                 }
             }
         });
-        childImplementations.put(PROBE_TIMESTAMP, new SysNodeExpression<Long>() {
+        childImplementations.put(PROBE_TIMESTAMP, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 if (processStats != null) {

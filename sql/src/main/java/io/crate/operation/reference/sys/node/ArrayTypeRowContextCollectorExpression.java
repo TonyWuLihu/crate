@@ -30,23 +30,24 @@ import io.crate.metadata.RowContextCollectorExpression;
 import javax.annotation.Nullable;
 import java.util.List;
 
-
 abstract class ArrayTypeRowContextCollectorExpression<RowType, IterType, ReturnType>
     extends RowContextCollectorExpression<RowType, ReturnType[]> {
 
     protected abstract List<IterType> items();
     protected abstract ReturnType valueForItem(IterType input);
 
+    private final Function<IterType, ReturnType> toReturnType = new Function<IterType, ReturnType>() {
+        @Nullable
+        @Override
+        public ReturnType apply(@Nullable IterType input) {
+            return valueForItem(input);
+        }
+    };
+
     @Override
     public ReturnType[] value() {
         List<IterType> items = items();
-        List<ReturnType> values = Lists.transform(items, new Function<IterType, ReturnType>() {
-            @Nullable
-            @Override
-            public ReturnType apply(@Nullable IterType input) {
-                return valueForItem(input);
-            }
-        });
+        List<ReturnType> values = Lists.transform(items, toReturnType);
         return (ReturnType[]) values.toArray();
     }
 }

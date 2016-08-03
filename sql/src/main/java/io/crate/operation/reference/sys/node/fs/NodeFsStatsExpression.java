@@ -22,12 +22,12 @@
 
 package io.crate.operation.reference.sys.node.fs;
 
-import io.crate.operation.reference.sys.node.SimpleDiscoveryNodeExpression;
+import io.crate.operation.reference.sys.node.SimpleNodeStatsExpression;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class NodeFsExpression extends SimpleDiscoveryNodeExpression<Map<String, Object>> {
+public class NodeFsStatsExpression extends SimpleNodeStatsExpression<Map<String, Object>> {
 
     private static final String TOTAL = "total";
     private static final String DISKS = "disks";
@@ -44,14 +44,14 @@ public class NodeFsExpression extends SimpleDiscoveryNodeExpression<Map<String, 
     static final String WRITES = "writes";
     static final String BYTES_WRITTEN = "bytes_written";
 
-    private final NodeFsTotalExpression total;
-    private final NodeFsDisksExpression disks;
-    private final NodeFsDataExpression data;
+    private final NodeFsTotalStatsExpression total;
+    private final NodeStatsFsDisksExpression disks;
+    private final NodeStatsFsDataExpression data;
 
-    public NodeFsExpression() {
-        total = new NodeFsTotalExpression();
-        disks = new NodeFsDisksExpression();
-        data = new NodeFsDataExpression();
+    public NodeFsStatsExpression() {
+        total = new NodeFsTotalStatsExpression();
+        disks = new NodeStatsFsDisksExpression();
+        data = new NodeStatsFsDataExpression();
     }
 
     @Override

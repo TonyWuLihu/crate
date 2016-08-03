@@ -22,7 +22,7 @@
 
 package io.crate.executor.transport;
 
-import io.crate.operation.reference.sys.node.DiscoveryNodeContext;
+import io.crate.operation.reference.sys.node.NodeStatsContext;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.transport.TransportResponse;
@@ -31,28 +31,28 @@ import java.io.IOException;
 
 public class NodeStatsResponse extends TransportResponse {
 
-    private DiscoveryNodeContext discoveryNodeContext;
+    private NodeStatsContext nodeStatsContext;
 
     public NodeStatsResponse() {
     }
 
-    public NodeStatsResponse(DiscoveryNodeContext discoveryNodeContext) {
-        this.discoveryNodeContext = discoveryNodeContext;
+    public NodeStatsResponse(NodeStatsContext nodeStatsContext) {
+        this.nodeStatsContext = nodeStatsContext;
     }
 
-    public DiscoveryNodeContext discoveryNodeContext() {
-        return discoveryNodeContext;
+    public NodeStatsContext nodeStatsContext() {
+        return nodeStatsContext;
     }
 
     @Override
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
-        discoveryNodeContext = in.readOptionalStreamable(DiscoveryNodeContext.newInstance());
+        nodeStatsContext = in.readOptionalStreamable(NodeStatsContext.newInstance());
     }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
-        out.writeOptionalStreamable(discoveryNodeContext);
+        out.writeOptionalStreamable(nodeStatsContext);
     }
 }

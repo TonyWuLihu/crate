@@ -26,8 +26,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import io.crate.metadata.SimpleObjectExpression;
 import io.crate.monitor.ExtendedFsStats;
-import io.crate.operation.reference.sys.node.local.SysNodeObjectReference;
+import io.crate.operation.reference.NestedObjectExpression;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.Loggers;
 
@@ -38,7 +39,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-class NodeFsTotalExpression extends SysNodeObjectReference {
+class NodeFsTotalExpression extends NestedObjectExpression {
 
     private static final String SIZE = "size";
     private static final String USED = "used";
@@ -100,7 +101,7 @@ class NodeFsTotalExpression extends SysNodeObjectReference {
         return totals;
     }
 
-    private class NodeFSTotalChildExpression extends ChildExpression<Long> {
+    private class NodeFSTotalChildExpression extends SimpleObjectExpression<Long> {
 
         private final String name;
 

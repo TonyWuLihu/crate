@@ -20,10 +20,23 @@
  * agreement.
  */
 
-package io.crate.operation.reference.sys.node.local;
+package io.crate.operation.reference.sys.node;
 
-import io.crate.metadata.SimpleObjectExpression;
+import io.crate.monitor.ExtendedNetworkStats;
 
-public abstract class SysNodeExpression<T> extends SimpleObjectExpression<T> {
+class NodeNetworkStatsExpression extends NestedNodeStatsExpression {
 
+    private static final String TCP = "tcp";
+    private static final String PROBE_TIMESTAMP = "probe_timestamp";
+
+    NodeNetworkStatsExpression() {
+        childImplementations.put(PROBE_TIMESTAMP, new SimpleNodeStatsExpression<Long>() {
+            @Override
+            public Long innerValue() {
+                ExtendedNetworkStats stats = this.row.networkStats();
+                return stats.timestamp();
+            }
+        });
+        childImplementations.put(TCP, new NodeNetworkTCPStatsExpression());
+    }
 }

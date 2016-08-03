@@ -25,6 +25,7 @@ package io.crate.operation.reference.sys.node;
 import com.google.common.collect.ImmutableList;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.ReferenceIdent;
+import io.crate.metadata.sys.SysClusterTableInfo;
 import io.crate.metadata.sys.SysNodesTableInfo;
 import io.crate.monitor.ExtendedNodeInfo;
 import org.elasticsearch.cluster.ClusterService;
@@ -43,7 +44,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class DiscoveryNodeContextFieldResolverTest {
+public class NodeStatsContextFieldResolverTest {
 
     private final ClusterService clusterService = mock(ClusterService.class);
     private final OsService osService = mock(OsService.class);
@@ -52,7 +53,7 @@ public class DiscoveryNodeContextFieldResolverTest {
     private final ThreadPool threadPool = mock(ThreadPool.class);
     private final ExtendedNodeInfo extendedNodeInfo = mock(ExtendedNodeInfo.class);
 
-    private DiscoveryNodeContextFieldResolver resolver;
+    private NodeStatsContextFieldResolver resolver;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -64,7 +65,7 @@ public class DiscoveryNodeContextFieldResolverTest {
         when(discoveryNode.name()).thenReturn("node_name");
         when(clusterService.localNode()).thenReturn(discoveryNode);
 
-        resolver = new DiscoveryNodeContextFieldResolver(
+        resolver = new NodeStatsContextFieldResolver(
             clusterService,
             osService,
             nodeService,
@@ -75,19 +76,23 @@ public class DiscoveryNodeContextFieldResolverTest {
 
     @Test
     public void testEmptyColumnIdents() {
-        DiscoveryNodeContext context = resolver.resolveForColumnIdents(ImmutableList.<ReferenceIdent>of());
+        NodeStatsContext context = resolver.forColumns(ImmutableList.<ReferenceIdent>of());
         assertDefaultDiscoveryContext(context);
     }
 
     @Test
-    public void testNullColumnIdents() {
-        DiscoveryNodeContext context = resolver.resolveForColumnIdents(null);
-        assertDefaultDiscoveryContext(context);
+    public void testWrongTableIdent() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Cannot resolve NodeStatsContext field for \"sys.cluster\" table ident.");
+
+        resolver.forColumns(ImmutableList.of(
+            new ReferenceIdent(SysClusterTableInfo.IDENT, SysNodesTableInfo.Columns.ID)
+        ));
     }
 
     @Test
     public void testColumnIdentsResolution() {
-        DiscoveryNodeContext context = resolver.resolveForColumnIdents(ImmutableList.of(
+        NodeStatsContext context = resolver.forColumns(ImmutableList.of(
             new ReferenceIdent(SysNodesTableInfo.IDENT, SysNodesTableInfo.Columns.ID),
             new ReferenceIdent(SysNodesTableInfo.IDENT, SysNodesTableInfo.Columns.NAME)
         ));
@@ -100,15 +105,15 @@ public class DiscoveryNodeContextFieldResolverTest {
     @Test
     public void testResolveForNonExistingColumnIdent() {
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Cannot resolve DiscoveryNodeContext field for \"dummy\" column ident.");
+        thrown.expectMessage("Cannot resolve NodeStatsContext field for \"dummy\" column ident.");
 
-        resolver.resolveForColumnIdents(ImmutableList.of(
+        resolver.forColumns(ImmutableList.of(
             new ReferenceIdent(SysNodesTableInfo.IDENT, SysNodesTableInfo.Columns.ID),
             new ReferenceIdent(SysNodesTableInfo.IDENT, new ColumnIdent("dummy"))
         ));
     }
 
-    private void assertDefaultDiscoveryContext(DiscoveryNodeContext context) {
+    private void assertDefaultDiscoveryContext(NodeStatsContext context) {
         assertThat(context.isComplete(), is(true));
         assertThat(context.id(), is(nullValue()));
         assertThat(context.name(), is(nullValue()));

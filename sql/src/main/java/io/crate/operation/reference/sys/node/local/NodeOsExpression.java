@@ -22,14 +22,11 @@
 
 package io.crate.operation.reference.sys.node.local;
 
+import io.crate.metadata.SimpleObjectExpression;
 import io.crate.monitor.ExtendedOsStats;
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.operation.reference.NestedObjectExpression;
 
-
-class NodeOsExpression extends SysNodeObjectReference {
-
-    abstract class OsExpression extends SysNodeExpression<Object> {
-    }
+class NodeOsExpression extends NestedObjectExpression {
 
     private static final String CPU = "cpu";
     private static final String UPTIME = "uptime";
@@ -41,14 +38,14 @@ class NodeOsExpression extends SysNodeObjectReference {
     }
 
     private void addChildImplementations(final ExtendedOsStats extendedOsStats) {
-        childImplementations.put(UPTIME, new OsExpression() {
+        childImplementations.put(UPTIME, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 long uptime = extendedOsStats.uptime().millis();
                 return uptime == -1000 ? -1 : uptime;
             }
         });
-        childImplementations.put(TIMESTAMP, new OsExpression() {
+        childImplementations.put(TIMESTAMP, new SimpleObjectExpression<Long>() {
             final long ts = System.currentTimeMillis();
 
             @Override
@@ -56,7 +53,7 @@ class NodeOsExpression extends SysNodeObjectReference {
                 return ts;
             }
         });
-        childImplementations.put(PROBE_TIMESTAMP, new OsExpression() {
+        childImplementations.put(PROBE_TIMESTAMP, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 return extendedOsStats.timestamp();

@@ -31,9 +31,9 @@ import java.util.List;
 import java.util.Map;
 
 
-public class NodeFsDataExpression extends DiscoveryNodeArrayTypeExpression<ExtendedFsStats.Info, Map<String, Object>> {
+public class NodeStatsFsDisksExpression extends NodeStatsArrayTypeExpression<ExtendedFsStats.Info, Map<String, Object>> {
 
-    public NodeFsDataExpression() {
+    public NodeStatsFsDisksExpression() {
     }
 
     @Override
@@ -44,18 +44,23 @@ public class NodeFsDataExpression extends DiscoveryNodeArrayTypeExpression<Exten
     @Override
     protected Map<String, Object> valueForItem(final ExtendedFsStats.Info input) {
         return new HashMap<String, Object>() {{
-            put(NodeFsExpression.DEV, input.dev());
-            put(NodeFsExpression.PATH, input.path());
+            put(NodeFsStatsExpression.DEV, input.dev());
+            put(NodeFsStatsExpression.SIZE, input.total());
+            put(NodeFsStatsExpression.USED, input.used());
+            put(NodeFsStatsExpression.AVAILABLE, input.available());
+            put(NodeFsStatsExpression.READS, input.diskReads());
+            put(NodeFsStatsExpression.BYTES_READ, input.diskReadSizeInBytes());
+            put(NodeFsStatsExpression.WRITES, input.diskWrites());
+            put(NodeFsStatsExpression.BYTES_WRITTEN, input.diskWriteSizeInBytes());
         }};
     }
 
-    public abstract static class Item<R> extends DiscoveryNodeArrayTypeExpression<ExtendedFsStats.Info, R> {
+    public abstract static class Item<R> extends NodeStatsArrayTypeExpression<ExtendedFsStats.Info, R> {
 
         @Override
         protected List<ExtendedFsStats.Info> items() {
             return Lists.newArrayList(this.row.extendedFsStats());
         }
-
     }
 }
 

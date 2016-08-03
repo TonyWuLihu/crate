@@ -34,33 +34,34 @@ import java.util.List;
 public class NodeStatsRequest extends TransportRequest {
 
     private String nodeId;
-    private List<ReferenceIdent> referenceIdents = new ArrayList<>();
+    private List<ReferenceIdent> columnIdents;
 
     public NodeStatsRequest() {
     }
 
-    public NodeStatsRequest(String nodeId, List<ReferenceIdent> referenceIdents) {
+    public NodeStatsRequest(String nodeId, List<ReferenceIdent> columnIdents) {
         this.nodeId = nodeId;
-        this.referenceIdents = referenceIdents;
+        this.columnIdents = columnIdents;
     }
 
     public String nodeId() {
         return nodeId;
     }
 
-    public List<ReferenceIdent> referenceIdents() {
-        return referenceIdents;
+    public List<ReferenceIdent> columnIdents() {
+        return columnIdents;
     }
 
     @Override
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
         nodeId = in.readString();
+        columnIdents = new ArrayList<>();
         int refIndentsSize = in.readVInt();
         for (int i = 0; i < refIndentsSize; i++) {
             ReferenceIdent referenceIdent = new ReferenceIdent();
             referenceIdent.readFrom(in);
-            referenceIdents.add(referenceIdent);
+            columnIdents.add(referenceIdent);
         }
     }
 
@@ -68,8 +69,8 @@ public class NodeStatsRequest extends TransportRequest {
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
         out.writeString(nodeId);
-        out.writeVInt(referenceIdents.size());
-        for (ReferenceIdent referenceIdent : referenceIdents) {
+        out.writeVInt(columnIdents.size());
+        for (ReferenceIdent referenceIdent : columnIdents) {
             referenceIdent.writeTo(out);
         }
     }

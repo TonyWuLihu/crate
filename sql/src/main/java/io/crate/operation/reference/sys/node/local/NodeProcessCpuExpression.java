@@ -22,10 +22,11 @@
 
 package io.crate.operation.reference.sys.node.local;
 
+import io.crate.metadata.SimpleObjectExpression;
 import io.crate.monitor.ExtendedProcessCpuStats;
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.operation.reference.NestedObjectExpression;
 
-class NodeProcessCpuExpression extends SysNodeObjectReference {
+class NodeProcessCpuExpression extends NestedObjectExpression {
 
     private static final String PERCENT = "percent";
     private static final String USER = "user";
@@ -36,7 +37,7 @@ class NodeProcessCpuExpression extends SysNodeObjectReference {
     }
 
     private void addChildImplementations(final ExtendedProcessCpuStats cpuStats) {
-        childImplementations.put(PERCENT, new SysNodeExpression<Short>() {
+        childImplementations.put(PERCENT, new SimpleObjectExpression<Short>() {
             @Override
             public Short value() {
                 if (cpuStats != null) {
@@ -46,7 +47,7 @@ class NodeProcessCpuExpression extends SysNodeObjectReference {
                 }
             }
         });
-        childImplementations.put(USER, new SysNodeExpression<Long>() {
+        childImplementations.put(USER, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 if (cpuStats != null) {
@@ -56,7 +57,7 @@ class NodeProcessCpuExpression extends SysNodeObjectReference {
                 }
             }
         });
-        childImplementations.put(SYSTEM, new SysNodeExpression<Long>() {
+        childImplementations.put(SYSTEM, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 if (cpuStats != null) {

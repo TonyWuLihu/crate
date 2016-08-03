@@ -23,18 +23,18 @@
 package io.crate.operation.reference.sys.node;
 
 
-class NodeLoadExpression extends NestedDiscoveryNodeExpression {
+class NodeLoadStatsExpression extends NestedNodeStatsExpression {
 
     private static final String ONE = "1";
     private static final String FIVE = "5";
     private static final String FIFTEEN = "15";
     private static final String PROBE_TIMESTAMP = "probe_timestamp";
 
-    NodeLoadExpression() {
-        childImplementations.put(ONE, new LoadExpression(0));
-        childImplementations.put(FIVE, new LoadExpression(1));
-        childImplementations.put(FIFTEEN, new LoadExpression(2));
-        childImplementations.put(PROBE_TIMESTAMP, new SimpleDiscoveryNodeExpression<Long>() {
+    NodeLoadStatsExpression() {
+        childImplementations.put(ONE, new LoadStatsExpression(0));
+        childImplementations.put(FIVE, new LoadStatsExpression(1));
+        childImplementations.put(FIFTEEN, new LoadStatsExpression(2));
+        childImplementations.put(PROBE_TIMESTAMP, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
                 return this.row.extendedOsStats().timestamp();
@@ -42,11 +42,11 @@ class NodeLoadExpression extends NestedDiscoveryNodeExpression {
         });
     }
 
-    private static class LoadExpression extends SimpleDiscoveryNodeExpression<Double> {
+    private static class LoadStatsExpression extends SimpleNodeStatsExpression<Double> {
 
         private final int idx;
 
-        LoadExpression(int idx) {
+        LoadStatsExpression(int idx) {
             this.idx = idx;
         }
 
@@ -59,5 +59,4 @@ class NodeLoadExpression extends NestedDiscoveryNodeExpression {
             }
         }
     }
-
 }

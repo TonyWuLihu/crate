@@ -31,7 +31,7 @@ import java.util.Map;
 
 
 class NodeThreadPoolsExpression
-    extends ArrayTypeRowContextCollectorExpression<DiscoveryNodeContext, Map.Entry<String, ThreadPools.ThreadPoolExecutorContext>, Object> {
+    extends ArrayTypeRowContextCollectorExpression<NodeStatsContext, Map.Entry<String, ThreadPools.ThreadPoolExecutorContext>, Object> {
 
     private static final String POOL_NAME = "name";
     private static final String ACTIVE = "active";

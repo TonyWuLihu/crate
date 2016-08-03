@@ -22,38 +22,39 @@
 
 package io.crate.operation.reference.sys.node.fs;
 
+import com.google.common.collect.Lists;
 import io.crate.monitor.ExtendedFsStats;
-import io.crate.operation.reference.sys.node.SimpleDiscoveryNodeExpression;
+import io.crate.operation.reference.sys.node.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static io.crate.operation.reference.sys.node.fs.NodeFsExpression.*;
 
-public class NodeFsTotalExpression extends SimpleDiscoveryNodeExpression<Map<String, Long>> {
+public class NodeStatsFsDataExpression extends NodeStatsArrayTypeExpression<ExtendedFsStats.Info, Map<String, Object>> {
 
-    public NodeFsTotalExpression() {
-    }
-
-    private Map<String, Long> getTotals() {
-        Map<String, Long> totals = new HashMap<>();
-        ExtendedFsStats.Info totalInfo = this.row.extendedFsStats().total();
-        totals.put(SIZE, totalInfo.total() == -1 ? -1 : totalInfo.total() * 1024);
-        totals.put(USED, totalInfo.used() == -1 ? - 1 : totalInfo.used() * 1024);
-        totals.put(AVAILABLE, totalInfo.available() == -1 ? -1 : totalInfo.available() * 1024);
-        totals.put(READS, totalInfo.diskReads());
-        totals.put(BYTES_READ, totalInfo.diskReadSizeInBytes());
-        totals.put(WRITES, totalInfo.diskWrites());
-        totals.put(BYTES_WRITTEN, totalInfo.diskWriteSizeInBytes());
-        return totals;
+    public NodeStatsFsDataExpression() {
     }
 
     @Override
-    public Map<String, Long> innerValue() {
-        return getTotals();
+    protected List<ExtendedFsStats.Info> items() {
+        return Lists.newArrayList(this.row.extendedFsStats());
     }
 
-    public static abstract class Item extends SimpleDiscoveryNodeExpression<Long> {
+    @Override
+    protected Map<String, Object> valueForItem(final ExtendedFsStats.Info input) {
+        return new HashMap<String, Object>() {{
+            put(NodeFsStatsExpression.DEV, input.dev());
+            put(NodeFsStatsExpression.PATH, input.path());
+        }};
+    }
 
+    public abstract static class Item<R> extends NodeStatsArrayTypeExpression<ExtendedFsStats.Info, R> {
+
+        @Override
+        protected List<ExtendedFsStats.Info> items() {
+            return Lists.newArrayList(this.row.extendedFsStats());
+        }
     }
 }
+

@@ -20,7 +20,7 @@
  * agreement.
  */
 
-package io.crate.operation.reference.sys.node;
+package io.crate.operation.reference.sys.node.local;
 
 import io.crate.metadata.NestedReferenceResolver;
 import io.crate.metadata.ReferenceIdent;

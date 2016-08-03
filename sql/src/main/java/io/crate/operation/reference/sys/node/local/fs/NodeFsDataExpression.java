@@ -23,10 +23,10 @@
 package io.crate.operation.reference.sys.node.local.fs;
 
 
+import io.crate.metadata.SimpleObjectExpression;
 import io.crate.monitor.ExtendedFsStats;
 import io.crate.operation.reference.NestedObjectExpression;
 import io.crate.operation.reference.sys.SysStaticObjectArrayReference;
-import io.crate.operation.reference.sys.node.local.SysNodeObjectReference;
 import org.apache.lucene.util.BytesRef;
 
 import java.util.List;
@@ -42,7 +42,7 @@ class NodeFsDataExpression extends SysStaticObjectArrayReference {
     }
 
     @Override
-    protected List<NestedObjectExpression> getChildImplementations() {
+    protected List<io.crate.operation.reference.NestedObjectExpression> getChildImplementations() {
         if (!initialized.getAndSet(true)) {
             addChildImplementations();
         }
@@ -55,20 +55,19 @@ class NodeFsDataExpression extends SysStaticObjectArrayReference {
         }
     }
 
-
-    private class NodeFsDataChildExpression extends SysNodeObjectReference {
+    private class NodeFsDataChildExpression extends NestedObjectExpression {
 
         private static final String DEV = "dev";
         private static final String PATH = "path";
 
         NodeFsDataChildExpression(final ExtendedFsStats.Info fsInfo) {
-            childImplementations.put(DEV, new ChildExpression<BytesRef>() {
+            childImplementations.put(DEV, new SimpleObjectExpression<BytesRef>() {
                 @Override
                 public BytesRef value() {
                     return fsInfo.dev();
                 }
             });
-            childImplementations.put(PATH, new ChildExpression<BytesRef>() {
+            childImplementations.put(PATH, new SimpleObjectExpression<BytesRef>() {
                 @Override
                 public BytesRef value() {
                     return fsInfo.path();

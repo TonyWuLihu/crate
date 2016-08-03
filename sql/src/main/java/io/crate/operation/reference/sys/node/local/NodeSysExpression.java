@@ -105,5 +105,4 @@ public class NodeSysExpression extends NestedObjectExpression {
         }
         return super.getChildImplementation(name);
     }
-
 }

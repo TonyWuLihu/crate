@@ -25,26 +25,26 @@ package io.crate.operation.reference.sys.node;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.lucene.BytesRefs;
 
-class NodeVersionExpression extends NestedDiscoveryNodeExpression {
+class NodeVersionStatsExpression extends NestedNodeStatsExpression {
 
     private static final String NUMBER = "number";
     private static final String BUILD_HASH = "build_hash";
     private static final String BUILD_SNAPSHOT = "build_snapshot";
 
-    NodeVersionExpression() {
-        childImplementations.put(NUMBER, new SimpleDiscoveryNodeExpression<BytesRef>() {
+    NodeVersionStatsExpression() {
+        childImplementations.put(NUMBER, new SimpleNodeStatsExpression<BytesRef>() {
             @Override
             public BytesRef innerValue() {
                 return BytesRefs.toBytesRef(this.row.version().number());
             }
         });
-        childImplementations.put(BUILD_HASH, new SimpleDiscoveryNodeExpression<BytesRef>() {
+        childImplementations.put(BUILD_HASH, new SimpleNodeStatsExpression<BytesRef>() {
             @Override
             public BytesRef innerValue() {
                 return BytesRefs.toBytesRef(this.row.build().hash());
             }
         });
-        childImplementations.put(BUILD_SNAPSHOT, new SimpleDiscoveryNodeExpression<Boolean>() {
+        childImplementations.put(BUILD_SNAPSHOT, new SimpleNodeStatsExpression<Boolean>() {
             @Override
             public Boolean innerValue() {
                 return this.row.version().snapshot();

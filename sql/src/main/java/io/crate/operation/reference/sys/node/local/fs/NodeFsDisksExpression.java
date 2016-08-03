@@ -22,10 +22,10 @@
 
 package io.crate.operation.reference.sys.node.local.fs;
 
+import io.crate.metadata.SimpleObjectExpression;
 import io.crate.monitor.ExtendedFsStats;
 import io.crate.operation.reference.NestedObjectExpression;
 import io.crate.operation.reference.sys.SysObjectArrayReference;
-import io.crate.operation.reference.sys.node.local.SysNodeObjectReference;
 import org.apache.lucene.util.BytesRef;
 
 import java.util.ArrayList;
@@ -40,15 +40,15 @@ class NodeFsDisksExpression extends SysObjectArrayReference {
     }
 
     @Override
-    protected List<NestedObjectExpression> getChildImplementations() {
-        List<NestedObjectExpression> diskRefs = new ArrayList<>(extendedFsStats.size());
+    protected List<io.crate.operation.reference.NestedObjectExpression> getChildImplementations() {
+        List<io.crate.operation.reference.NestedObjectExpression> diskRefs = new ArrayList<>(extendedFsStats.size());
         for (ExtendedFsStats.Info info : extendedFsStats) {
             diskRefs.add(new NodeFsDiskChildExpression(info));
         }
         return diskRefs;
     }
 
-    private static class NodeFsDiskChildExpression extends SysNodeObjectReference {
+    private static class NodeFsDiskChildExpression extends NestedObjectExpression {
 
         private static final String DEV = "dev";
         private static final String SIZE = "size";
@@ -67,49 +67,49 @@ class NodeFsDisksExpression extends SysObjectArrayReference {
         }
 
         private void addChildImplementations() {
-            childImplementations.put(DEV, new ChildExpression<BytesRef>() {
+            childImplementations.put(DEV, new SimpleObjectExpression<BytesRef>() {
                 @Override
                 public BytesRef value() {
                     return fsInfo.dev();
                 }
             });
-            childImplementations.put(SIZE, new ChildExpression<Long>() {
+            childImplementations.put(SIZE, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     return fsInfo.total();
                 }
             });
-            childImplementations.put(USED, new ChildExpression<Long>() {
+            childImplementations.put(USED, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     return fsInfo.used();
                 }
             });
-            childImplementations.put(AVAILABLE, new ChildExpression<Long>() {
+            childImplementations.put(AVAILABLE, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     return fsInfo.available();
                 }
             });
-            childImplementations.put(READS, new ChildExpression<Long>() {
+            childImplementations.put(READS, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     return fsInfo.diskReads();
                 }
             });
-            childImplementations.put(BYTES_READ, new ChildExpression<Long>() {
+            childImplementations.put(BYTES_READ, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     return fsInfo.diskReadSizeInBytes();
                 }
             });
-            childImplementations.put(WRITES, new ChildExpression<Long>() {
+            childImplementations.put(WRITES, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     return fsInfo.diskWrites();
                 }
             });
-            childImplementations.put(BYTES_WRITTEN, new ChildExpression<Long>() {
+            childImplementations.put(BYTES_WRITTEN, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     return fsInfo.diskWriteSizeInBytes();
@@ -117,7 +117,5 @@ class NodeFsDisksExpression extends SysObjectArrayReference {
             });
 
         }
-
     }
-
 }

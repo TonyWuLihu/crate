@@ -22,13 +22,13 @@
 
 package io.crate.operation.reference.sys.node.local;
 
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.metadata.SimpleObjectExpression;
 import org.apache.lucene.util.BytesRef;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-class NodeHostnameExpression extends SysNodeExpression<BytesRef> {
+class NodeHostnameExpression extends SimpleObjectExpression<BytesRef> {
 
     @Override
     public BytesRef value() {
@@ -39,5 +39,4 @@ class NodeHostnameExpression extends SysNodeExpression<BytesRef> {
             return null;
         }
     }
-
 }

@@ -22,9 +22,11 @@
 
 package io.crate.operation.reference.sys.node.local;
 
+import io.crate.metadata.SimpleObjectExpression;
 import io.crate.monitor.ExtendedNetworkStats;
+import io.crate.operation.reference.NestedObjectExpression;
 
-class NodeNetworkTCPExpression extends SysNodeObjectReference {
+class NodeNetworkTCPExpression extends NestedObjectExpression {
 
     private static final Long VALUE_UNAVAILABLE = -1L;
 
@@ -33,7 +35,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
         childImplementations.put(TCPPacketsExpression.NAME, new TCPPacketsExpression(stats));
     }
 
-    private static class TCPConnectionsExpression extends SysNodeObjectReference {
+    private static class TCPConnectionsExpression extends NestedObjectExpression {
 
         public static final String NAME = "connections";
 
@@ -48,7 +50,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
         }
 
         private void addChildImplementations(final ExtendedNetworkStats.Tcp tcp) {
-            childImplementations.put(INITIATED, new TCPConnectionsChildExpression() {
+            childImplementations.put(INITIATED, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -57,7 +59,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
                     return VALUE_UNAVAILABLE;
                 }
             });
-            childImplementations.put(ACCEPTED, new TCPConnectionsChildExpression() {
+            childImplementations.put(ACCEPTED, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -66,7 +68,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
                     return VALUE_UNAVAILABLE;
                 }
             });
-            childImplementations.put(CURR_ESTABLISHED, new TCPConnectionsChildExpression() {
+            childImplementations.put(CURR_ESTABLISHED, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -75,7 +77,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
                     return VALUE_UNAVAILABLE;
                 }
             });
-            childImplementations.put(DROPPED, new TCPConnectionsChildExpression() {
+            childImplementations.put(DROPPED, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -84,7 +86,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
                     return VALUE_UNAVAILABLE;
                 }
             });
-            childImplementations.put(EMBRYONIC_DROPPED, new TCPConnectionsChildExpression() {
+            childImplementations.put(EMBRYONIC_DROPPED, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -95,11 +97,9 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
             });
         }
 
-        private abstract class TCPConnectionsChildExpression extends SysNodeExpression<Long> {
-        }
     }
 
-    private static class TCPPacketsExpression extends SysNodeObjectReference {
+    private static class TCPPacketsExpression extends NestedObjectExpression {
 
         public static final String NAME = "packets";
 
@@ -114,7 +114,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
         }
 
         private void addChildImplementations(final ExtendedNetworkStats.Tcp tcp) {
-            childImplementations.put(SENT, new TCPPacketsChildExpression() {
+            childImplementations.put(SENT, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -123,7 +123,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
                     return VALUE_UNAVAILABLE;
                 }
             });
-            childImplementations.put(RECEIVED, new TCPPacketsChildExpression() {
+            childImplementations.put(RECEIVED, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -132,7 +132,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
                     return VALUE_UNAVAILABLE;
                 }
             });
-            childImplementations.put(RETRANSMITTED, new TCPPacketsChildExpression() {
+            childImplementations.put(RETRANSMITTED, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -141,7 +141,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
                     return VALUE_UNAVAILABLE;
                 }
             });
-            childImplementations.put(ERRORS_RECEIVED, new TCPPacketsChildExpression() {
+            childImplementations.put(ERRORS_RECEIVED, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -150,7 +150,7 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
                     return VALUE_UNAVAILABLE;
                 }
             });
-            childImplementations.put(RST_SENT, new TCPPacketsChildExpression() {
+            childImplementations.put(RST_SENT, new SimpleObjectExpression<Long>() {
                 @Override
                 public Long value() {
                     if (tcp != null) {
@@ -160,10 +160,5 @@ class NodeNetworkTCPExpression extends SysNodeObjectReference {
                 }
             });
         }
-
-        private abstract class TCPPacketsChildExpression extends SysNodeExpression<Long> {
-        }
-
     }
-
 }

@@ -30,10 +30,10 @@ import io.crate.metadata.expressions.RowCollectExpressionFactory;
 import io.crate.metadata.sys.SysNodesTableInfo;
 import io.crate.monitor.ExtendedFsStats;
 import io.crate.monitor.ThreadPools;
-import io.crate.operation.reference.sys.node.fs.NodeFsDataExpression;
-import io.crate.operation.reference.sys.node.fs.NodeFsDisksExpression;
-import io.crate.operation.reference.sys.node.fs.NodeFsExpression;
-import io.crate.operation.reference.sys.node.fs.NodeFsTotalExpression;
+import io.crate.operation.reference.sys.node.fs.NodeStatsFsDataExpression;
+import io.crate.operation.reference.sys.node.fs.NodeStatsFsDisksExpression;
+import io.crate.operation.reference.sys.node.fs.NodeFsStatsExpression;
+import io.crate.operation.reference.sys.node.fs.NodeFsTotalStatsExpression;
 import org.apache.lucene.util.BytesRef;
 
 import java.util.Map;
@@ -48,10 +48,10 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.ID, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new RowContextCollectorExpression<DiscoveryNodeContext, BytesRef>() {
+                    return new RowContextCollectorExpression<NodeStatsContext, BytesRef>() {
                         @Override
                         public BytesRef value() {
-                            return row == null ? null : row.id();
+                            return row.id();
                         }
                     };
                 }
@@ -59,10 +59,10 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.NAME, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new RowContextCollectorExpression<DiscoveryNodeContext, BytesRef>() {
+                    return new RowContextCollectorExpression<NodeStatsContext, BytesRef>() {
                         @Override
                         public BytesRef value() {
-                            return row == null ? null : row.name();
+                            return row.name();
                         }
                     };
                 }
@@ -70,7 +70,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.HOSTNAME, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new SimpleDiscoveryNodeExpression<BytesRef>() {
+                    return new SimpleNodeStatsExpression<BytesRef>() {
                         @Override
                         public BytesRef innerValue() {
                             return row.hostname();
@@ -81,7 +81,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.REST_URL, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new SimpleDiscoveryNodeExpression<BytesRef>() {
+                    return new SimpleNodeStatsExpression<BytesRef>() {
                         @Override
                         public BytesRef innerValue() {
                             return row.restUrl();
@@ -92,31 +92,31 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.PORT, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodePortExpression();
+                    return new NodePortStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.LOAD, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeLoadExpression();
+                    return new NodeLoadStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.MEM, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeMemoryExpression();
+                    return new NodeMemoryStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.HEAP, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeHeapExpression();
+                    return new NodeHeapStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.VERSION, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeVersionExpression();
+                    return new NodeVersionStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.THREAD_POOLS, new RowCollectExpressionFactory() {
@@ -128,7 +128,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.THREAD_POOLS_NAME, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeThreadPoolExpression<String>() {
+                    return new NodeStatsThreadPoolExpression<String>() {
                         @Override
                         protected String valueForItem(Map.Entry<String, ThreadPools.ThreadPoolExecutorContext> input) {
                             return input.getKey();
@@ -139,7 +139,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.THREAD_POOLS_ACTIVE, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeThreadPoolExpression<Integer>() {
+                    return new NodeStatsThreadPoolExpression<Integer>() {
                         @Override
                         protected Integer valueForItem(Map.Entry<String, ThreadPools.ThreadPoolExecutorContext> input) {
                             return input.getValue().activeCount();
@@ -150,7 +150,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.THREAD_POOLS_REJECTED, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeThreadPoolExpression<Long>() {
+                    return new NodeStatsThreadPoolExpression<Long>() {
                         @Override
                         protected Long valueForItem(Map.Entry<String, ThreadPools.ThreadPoolExecutorContext> input) {
                             return input.getValue().rejectedCount();
@@ -161,7 +161,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.THREAD_POOLS_LARGEST, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeThreadPoolExpression<Integer>() {
+                    return new NodeStatsThreadPoolExpression<Integer>() {
                         @Override
                         protected Integer valueForItem(Map.Entry<String, ThreadPools.ThreadPoolExecutorContext> input) {
                             return input.getValue().largestPoolSize();
@@ -172,7 +172,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.THREAD_POOLS_COMPLETED, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeThreadPoolExpression<Long>() {
+                    return new NodeStatsThreadPoolExpression<Long>() {
                         @Override
                         protected Long valueForItem(Map.Entry<String, ThreadPools.ThreadPoolExecutorContext> input) {
                             return input.getValue().completedTaskCount();
@@ -183,7 +183,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.THREAD_POOLS_THREADS, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeThreadPoolExpression<Integer>() {
+                    return new NodeStatsThreadPoolExpression<Integer>() {
                         @Override
                         protected Integer valueForItem(Map.Entry<String, ThreadPools.ThreadPoolExecutorContext> input) {
                             return input.getValue().poolSize();
@@ -194,7 +194,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.THREAD_POOLS_QUEUE, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeThreadPoolExpression<Integer>() {
+                    return new NodeStatsThreadPoolExpression<Integer>() {
                         @Override
                         protected Integer valueForItem(Map.Entry<String, ThreadPools.ThreadPoolExecutorContext> input) {
                             return input.getValue().queueSize();
@@ -205,43 +205,43 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.NETWORK, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeNetworkExpression();
+                    return new NodeNetworkStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.OS, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeOsExpression();
+                    return new NodeOsStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.OS_INFO, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeOsInfoExpression();
+                    return new NodeOsInfoStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.PROCESS, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeProcessExpression();
+                    return new NodeProcessStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.FS, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsExpression();
+                    return new NodeFsStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.FS_TOTAL, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsTotalExpression();
+                    return new NodeFsTotalStatsExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.FS_TOTAL_SIZE, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsTotalExpression.Item() {
+                    return new SimpleNodeStatsExpression<Long>() {
                         @Override
                         public Long innerValue() {
                             return this.row.extendedFsStats().total().total();
@@ -252,7 +252,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_TOTAL_USED, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsTotalExpression.Item() {
+                    return new SimpleNodeStatsExpression<Long>() {
                         @Override
                         public Long innerValue() {
                             return this.row.extendedFsStats().total().used();
@@ -263,7 +263,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_TOTAL_AVAILABLE, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsTotalExpression.Item() {
+                    return new SimpleNodeStatsExpression<Long>() {
                         @Override
                         public Long innerValue() {
                             return this.row.extendedFsStats().total().available();
@@ -274,7 +274,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_TOTAL_READS, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsTotalExpression.Item() {
+                    return new SimpleNodeStatsExpression<Long>() {
                         @Override
                         public Long innerValue() {
                             return this.row.extendedFsStats().total().diskReads();
@@ -285,7 +285,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_TOTAL_BYTES_READ, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsTotalExpression.Item() {
+                    return new SimpleNodeStatsExpression<Long>() {
                         @Override
                         public Long innerValue() {
                             return this.row.extendedFsStats().total().diskReadSizeInBytes();
@@ -296,7 +296,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_TOTAL_WRITES, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsTotalExpression.Item() {
+                    return new SimpleNodeStatsExpression<Long>() {
                         @Override
                         public Long innerValue() {
                             return this.row.extendedFsStats().total().diskWrites();
@@ -307,7 +307,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_TOTAL_BYTES_WRITTEN, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsTotalExpression.Item() {
+                    return new SimpleNodeStatsExpression<Long>() {
                         @Override
                         public Long innerValue() {
                             return this.row.extendedFsStats().total().diskWriteSizeInBytes();
@@ -318,13 +318,13 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDisksExpression();
+                    return new NodeStatsFsDisksExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.FS_DISKS_DEV, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDisksExpression.Item<BytesRef>() {
+                    return new NodeStatsFsDisksExpression.Item<BytesRef>() {
                         @Override
                         protected BytesRef valueForItem(ExtendedFsStats.Info input) {
                             return input.dev();
@@ -335,7 +335,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_SIZE, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsDisksExpression.Item<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.total();
@@ -346,7 +346,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_USED, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsDisksExpression.Item<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.used();
@@ -357,7 +357,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_AVAILABLE, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsDisksExpression.Item<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.available();
@@ -368,7 +368,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_READS, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsDisksExpression.Item<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.diskReads();
@@ -379,7 +379,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_BYTES_READ, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsDisksExpression.Item<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.diskReadSizeInBytes();
@@ -390,7 +390,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_WRITES, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsDisksExpression.Item<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.diskWrites();
@@ -401,7 +401,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_BYTES_WRITTEN, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsDisksExpression.Item<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.diskWriteSizeInBytes();
@@ -412,13 +412,13 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DATA, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDataExpression();
+                    return new NodeStatsFsDataExpression();
                 }
             })
             .put(SysNodesTableInfo.Columns.FS_DATA_DEV, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDataExpression.Item<BytesRef>() {
+                    return new NodeStatsFsDataExpression.Item<BytesRef>() {
                         @Override
                         protected BytesRef valueForItem(ExtendedFsStats.Info input) {
                             return input.dev();
@@ -429,7 +429,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DATA_PATH, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeFsDataExpression.Item<BytesRef>() {
+                    return new NodeStatsFsDataExpression.Item<BytesRef>() {
                         @Override
                         protected BytesRef valueForItem(ExtendedFsStats.Info input) {
                             return input.path();

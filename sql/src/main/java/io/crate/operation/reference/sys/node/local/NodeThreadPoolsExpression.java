@@ -39,5 +39,4 @@ class NodeThreadPoolsExpression extends SysStaticObjectArrayReference {
             childImplementations.add(new NodeThreadPoolExpression(threadPool, info.getName()));
         }
     }
-
 }

@@ -21,11 +21,11 @@
 
 package io.crate.operation.reference.sys.node.local;
 
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.metadata.SimpleObjectExpression;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.cluster.ClusterService;
 
-class NodeRestUrlExpression extends SysNodeExpression<BytesRef> {
+class NodeRestUrlExpression extends SimpleObjectExpression<BytesRef> {
 
     private final ClusterService clusterService;
 
@@ -38,5 +38,4 @@ class NodeRestUrlExpression extends SysNodeExpression<BytesRef> {
         String val = clusterService.localNode() != null ? clusterService.localNode().attributes().get("http_address") : null;
         return val != null ? new BytesRef(val) : null;
     }
-
 }

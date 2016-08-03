@@ -22,22 +22,34 @@
 
 package io.crate.operation.reference.sys.node;
 
-import io.crate.monitor.ExtendedNetworkStats;
+class NodeOsStatsExpression extends NestedNodeStatsExpression {
 
-class NodeNetworkExpression extends NestedDiscoveryNodeExpression {
-
-    private static final String TCP = "tcp";
+    private static final String UPTIME = "uptime";
+    private static final String TIMESTAMP = "timestamp";
     private static final String PROBE_TIMESTAMP = "probe_timestamp";
+    private static final String CPU = "cpu";
 
-    NodeNetworkExpression() {
-        childImplementations.put(PROBE_TIMESTAMP, new SimpleDiscoveryNodeExpression<Long>() {
+    NodeOsStatsExpression() {
+        childImplementations.put(UPTIME, new SimpleNodeStatsExpression<Long>() {
             @Override
             public Long innerValue() {
-                ExtendedNetworkStats stats = this.row.networkStats();
-                return stats.timestamp();
+                long uptime = this.row.extendedOsStats().uptime().millis();
+                return uptime > 0 ? uptime : -1;
             }
         });
-        childImplementations.put(TCP, new NodeNetworkTCPExpression());
+        childImplementations.put(TIMESTAMP, new SimpleNodeStatsExpression<Long>() {
+            final long ts = System.currentTimeMillis();
+            @Override
+            public Long innerValue() {
+                return ts;
+            }
+        });
+        childImplementations.put(PROBE_TIMESTAMP, new SimpleNodeStatsExpression<Long>() {
+            @Override
+            public Long innerValue() {
+                return this.row.extendedOsStats().timestamp();
+            }
+        });
+        childImplementations.put(CPU, new NodeOsCpuStatsExpression());
     }
-
 }

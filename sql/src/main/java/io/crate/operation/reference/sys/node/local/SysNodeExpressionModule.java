@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.  You may
  * obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,10 +19,21 @@
  * software solely pursuant to the terms of the relevant commercial agreement.
  */
 
-package io.crate.operation.reference.sys.node;
+package io.crate.operation.reference.sys.node.local;
 
-import io.crate.metadata.SimpleObjectExpression;
+import io.crate.metadata.ReferenceIdent;
+import io.crate.metadata.ReferenceImplementation;
+import io.crate.operation.reference.sys.node.local.NodeSysExpression;
+import org.elasticsearch.common.inject.AbstractModule;
+import org.elasticsearch.common.inject.multibindings.MapBinder;
 
-public abstract class SysNodeExpression<T> extends SimpleObjectExpression<T> {
+public class SysNodeExpressionModule extends AbstractModule {
 
+    private MapBinder<ReferenceIdent, ReferenceImplementation> refBinder;
+
+    @Override
+    protected void configure() {
+        refBinder = MapBinder.newMapBinder(binder(), ReferenceIdent.class, ReferenceImplementation.class);
+        bind(NodeSysExpression.class).asEagerSingleton();
+    }
 }

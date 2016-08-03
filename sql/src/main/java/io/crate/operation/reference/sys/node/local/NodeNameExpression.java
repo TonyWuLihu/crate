@@ -22,11 +22,12 @@
 
 package io.crate.operation.reference.sys.node.local;
 
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.metadata.SimpleObjectExpression;
 import org.apache.lucene.util.BytesRef;
+import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.discovery.Discovery;
 
-class NodeNameExpression extends SysNodeExpression<BytesRef> {
+class NodeNameExpression extends SimpleObjectExpression<BytesRef> {
 
     private final Discovery discovery;
     private BytesRef value = null;
@@ -38,10 +39,10 @@ class NodeNameExpression extends SysNodeExpression<BytesRef> {
     @Override
     public BytesRef value() {
         // value could not be ready on node start-up, but is static once set
-        if (value == null && discovery.localNode() != null) {
-            value = new BytesRef(discovery.localNode().getName());
+        DiscoveryNode node = discovery.localNode();
+        if (value == null && node != null) {
+            value = new BytesRef(node.getName());
         }
         return value;
     }
-
 }

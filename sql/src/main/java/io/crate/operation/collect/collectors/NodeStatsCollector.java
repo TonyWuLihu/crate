@@ -35,7 +35,7 @@ import io.crate.operation.collect.CrateCollector;
 import io.crate.operation.collect.RowsTransformer;
 import io.crate.operation.projectors.IterableRowEmitter;
 import io.crate.operation.projectors.RowReceiver;
-import io.crate.operation.reference.sys.node.DiscoveryNodeContext;
+import io.crate.operation.reference.sys.node.NodeStatsContext;
 import io.crate.planner.node.dql.RoutedCollectPhase;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -78,7 +78,7 @@ public class NodeStatsCollector implements CrateCollector {
     }
 
     private void prepareCollect() {
-        final List<DiscoveryNodeContext> discoveryNodeContexts = new ArrayList<>(nodes.size());
+        final List<NodeStatsContext> nodeStatsContexts = new ArrayList<>(nodes.size());
         final CountDownLatch counter = new CountDownLatch(nodes.size());
         for (final DiscoveryNode node : nodes) {
             List<ReferenceIdent> referenceIdents = referenceIdentVisitor.process(collectPhase.toCollect());
@@ -86,14 +86,14 @@ public class NodeStatsCollector implements CrateCollector {
             transportStatTablesAction.execute(node.id(), request, new ActionListener<NodeStatsResponse>() {
                 @Override
                 public void onResponse(NodeStatsResponse response) {
-                    discoveryNodeContexts.add(response.discoveryNodeContext());
+                    nodeStatsContexts.add(response.nodeStatsContext());
                     counter.countDown();
                 }
 
                 @Override
                 public void onFailure(Throwable t) {
                     if (t instanceof ReceiveTimeoutTransportException) {
-                        discoveryNodeContexts.add(new DiscoveryNodeContext(node.id(), node.name()));
+                        nodeStatsContexts.add(new NodeStatsContext(node.id(), node.name()));
                     }
                     counter.countDown();
                 }
@@ -107,7 +107,7 @@ public class NodeStatsCollector implements CrateCollector {
 
         this.emitter = new IterableRowEmitter(
             rowReceiver,
-            RowsTransformer.toRowsIterable(inputSymbolVisitor, collectPhase, discoveryNodeContexts)
+            RowsTransformer.toRowsIterable(inputSymbolVisitor, collectPhase, nodeStatsContexts)
         );
     }
 

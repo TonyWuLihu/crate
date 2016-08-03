@@ -24,55 +24,34 @@ package io.crate.operation.reference.sys.node.local;
 
 import io.crate.Build;
 import io.crate.Version;
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.metadata.SimpleObjectExpression;
+import io.crate.operation.reference.NestedObjectExpression;
 import org.apache.lucene.util.BytesRef;
 
-class NodeVersionExpression extends SysNodeObjectReference {
+class NodeVersionExpression extends NestedObjectExpression {
 
     private static final String NUMBER = "number";
     private static final String BUILD_HASH = "build_hash";
     private static final String BUILD_SNAPSHOT = "build_snapshot";
 
     NodeVersionExpression() {
-        childImplementations.put(NUMBER, new VersionNumberExpression());
-        childImplementations.put(BUILD_HASH, new VersionBuildHashExpression());
-        childImplementations.put(BUILD_SNAPSHOT, new VersionBuildSnapshotExpression());
+        childImplementations.put(NUMBER, new SimpleObjectExpression<BytesRef>() {
+            @Override
+            public BytesRef value() {
+                return new BytesRef(Version.CURRENT.number());
+            }
+        });
+        childImplementations.put(BUILD_HASH, new SimpleObjectExpression<BytesRef>() {
+            @Override
+            public BytesRef value() {
+                return new BytesRef(Build.CURRENT.hash());
+            }
+        });
+        childImplementations.put(BUILD_SNAPSHOT, new SimpleObjectExpression<Boolean>() {
+            @Override
+            public Boolean value() {
+                return Version.CURRENT.snapshot;
+            }
+        });
     }
-
-    private static class VersionNumberExpression extends SysNodeExpression<BytesRef> {
-
-        private final BytesRef versionNumber;
-
-        VersionNumberExpression() {
-            versionNumber = new BytesRef(Version.CURRENT.number());
-        }
-
-        @Override
-        public BytesRef value() {
-            return versionNumber;
-        }
-    }
-
-    private static class VersionBuildHashExpression extends SysNodeExpression<BytesRef> {
-
-        private final BytesRef buildHash;
-
-        VersionBuildHashExpression() {
-            buildHash = new BytesRef(Build.CURRENT.hash());
-        }
-
-        @Override
-        public BytesRef value() {
-            return buildHash;
-        }
-    }
-
-    private static class VersionBuildSnapshotExpression extends SysNodeExpression<Boolean> {
-
-        @Override
-        public Boolean value() {
-            return Version.CURRENT.snapshot;
-        }
-    }
-
 }

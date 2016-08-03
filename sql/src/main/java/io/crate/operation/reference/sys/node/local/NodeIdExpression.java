@@ -22,13 +22,12 @@
 
 package io.crate.operation.reference.sys.node.local;
 
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.metadata.SimpleObjectExpression;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 
-
-class NodeIdExpression extends SysNodeExpression<BytesRef> {
+class NodeIdExpression extends SimpleObjectExpression<BytesRef> {
 
     private final ClusterService clusterService;
     private BytesRef value;
@@ -46,5 +45,4 @@ class NodeIdExpression extends SysNodeExpression<BytesRef> {
         }
         return value;
     }
-
 }

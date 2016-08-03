@@ -22,14 +22,14 @@
 
 package io.crate.operation.reference.sys.node;
 
-import io.crate.operation.reference.RowCollectNestedObjectExpression;
+import io.crate.metadata.RowContextCollectorExpression;
 
-import java.util.Map;
-
-public abstract class NestedDiscoveryNodeExpression extends RowCollectNestedObjectExpression<DiscoveryNodeContext> {
+public abstract class SimpleNodeStatsExpression<R> extends RowContextCollectorExpression<NodeStatsContext, R> {
 
     @Override
-    public Map<String, Object> value() {
-        return row.isComplete() ? super.value() : null;
+    public R value() {
+        return row.isComplete() ? innerValue() : null;
     }
+
+    public abstract R innerValue();
 }

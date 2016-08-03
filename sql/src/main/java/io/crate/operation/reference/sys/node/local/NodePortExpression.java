@@ -22,19 +22,17 @@
 
 package io.crate.operation.reference.sys.node.local;
 
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.metadata.SimpleObjectExpression;
+import io.crate.operation.reference.NestedObjectExpression;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.admin.cluster.node.info.NodeInfo;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.service.NodeService;
 
 import java.io.IOException;
 
-
-class NodePortExpression extends SysNodeObjectReference {
-
-    abstract class PortExpression extends SysNodeExpression<Integer> {
-    }
+class NodePortExpression extends NestedObjectExpression {
 
     private static final String HTTP = "http";
     private static final String TRANSPORT = "transport";
@@ -47,16 +45,17 @@ class NodePortExpression extends SysNodeObjectReference {
     }
 
     private void addChildImplementations() {
-        childImplementations.put(HTTP, new PortExpression() {
+        childImplementations.put(HTTP, new SimpleObjectExpression<Integer>() {
             @Override
             public Integer value() {
-                if (nodeService.info().getHttp() == null) {
+                NodeInfo nodeInfo = nodeService.info();
+                if (nodeInfo.getHttp() == null) {
                     return null;
                 }
-                return portFromAddress(nodeService.info().getHttp().address().publishAddress());
+                return portFromAddress(nodeInfo.getHttp().address().publishAddress());
             }
         });
-        childImplementations.put(TRANSPORT, new PortExpression() {
+        childImplementations.put(TRANSPORT, new SimpleObjectExpression<Integer>() {
             @Override
             public Integer value() {
                 try {
@@ -75,5 +74,4 @@ class NodePortExpression extends SysNodeObjectReference {
         }
         return port;
     }
-
 }

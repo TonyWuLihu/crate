@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import io.crate.action.sql.SQLAction;
 import io.crate.action.sql.SQLRequest;
 import io.crate.testing.SQLTransportExecutor;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.disruption.NetworkPartition;

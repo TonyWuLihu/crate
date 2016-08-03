@@ -22,10 +22,11 @@
 
 package io.crate.operation.reference.sys.node.local;
 
+import io.crate.metadata.SimpleObjectExpression;
 import io.crate.monitor.ExtendedOsStats;
-import io.crate.operation.reference.sys.node.SysNodeExpression;
+import io.crate.operation.reference.NestedObjectExpression;
 
-public class NodeLoadExpression extends SysNodeObjectReference {
+public class NodeLoadExpression extends NestedObjectExpression {
 
     private static final String ONE = "1";
     private static final String FIVE = "5";
@@ -36,7 +37,7 @@ public class NodeLoadExpression extends SysNodeObjectReference {
         childImplementations.put(ONE, new LoadExpression(os, 0));
         childImplementations.put(FIVE, new LoadExpression(os, 1));
         childImplementations.put(FIFTEEN, new LoadExpression(os, 2));
-        childImplementations.put(PROBE_TIMESTAMP, new SysNodeExpression<Long>() {
+        childImplementations.put(PROBE_TIMESTAMP, new SimpleObjectExpression<Long>() {
             @Override
             public Long value() {
                 return os.timestamp();
@@ -44,7 +45,7 @@ public class NodeLoadExpression extends SysNodeObjectReference {
         });
     }
 
-    private static class LoadExpression extends SysNodeExpression<Double> {
+    private static class LoadExpression extends SimpleObjectExpression<Double> {
 
         private final int idx;
         private final ExtendedOsStats stats;
@@ -63,5 +64,4 @@ public class NodeLoadExpression extends SysNodeObjectReference {
             }
         }
     }
-
 }

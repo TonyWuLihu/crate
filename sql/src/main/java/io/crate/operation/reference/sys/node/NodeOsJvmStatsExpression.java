@@ -24,36 +24,33 @@ package io.crate.operation.reference.sys.node;
 
 import org.apache.lucene.util.BytesRef;
 
-class NodeOsJvmExpression extends NestedDiscoveryNodeExpression {
+class NodeOsJvmStatsExpression extends NestedNodeStatsExpression {
 
     private static final String VERSION = "version";
     private static final String VM_NAME = "vm_name";
     private static final String VM_VENDOR = "vm_vendor";
     private static final String VM_VERSION = "vm_version";
 
-    private abstract class JvmExpression extends SimpleDiscoveryNodeExpression<BytesRef> {
-    }
-
-    NodeOsJvmExpression() {
-        childImplementations.put(VERSION, new JvmExpression() {
+    NodeOsJvmStatsExpression() {
+        childImplementations.put(VERSION, new SimpleNodeStatsExpression<BytesRef>() {
             @Override
             public BytesRef innerValue() {
                 return this.row.javaVersion();
             }
         });
-        childImplementations.put(VM_NAME, new JvmExpression() {
+        childImplementations.put(VM_NAME, new SimpleNodeStatsExpression<BytesRef>() {
             @Override
             public BytesRef innerValue() {
                 return this.row.jvmName();
             }
         });
-        childImplementations.put(VM_VENDOR, new JvmExpression() {
+        childImplementations.put(VM_VENDOR, new SimpleNodeStatsExpression<BytesRef>() {
             @Override
             public BytesRef innerValue() {
                 return this.row.jvmVendor();
             }
         });
-        childImplementations.put(VM_VERSION, new JvmExpression() {
+        childImplementations.put(VM_VERSION, new SimpleNodeStatsExpression<BytesRef>() {
             @Override
             public BytesRef innerValue() {
                 return this.row.jvmVersion();

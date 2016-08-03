@@ -41,7 +41,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DiscoveryNodeContext implements Streamable {
+public class NodeStatsContext implements Streamable {
 
     private final boolean complete;
 
@@ -71,17 +71,17 @@ public class DiscoveryNodeContext implements Streamable {
     private BytesRef jvmVendor;
     private BytesRef jvmVersion;
 
-    public static DiscoveryNodeContext newInstance() {
-        return new DiscoveryNodeContext(true);
+    public static NodeStatsContext newInstance() {
+        return new NodeStatsContext(true);
     }
 
-    public DiscoveryNodeContext(String id, String name) {
+    public NodeStatsContext(String id, String name) {
         this(false);
         this.id = BytesRefs.toBytesRef(id);
         this.name = BytesRefs.toBytesRef(name);
     }
 
-    public DiscoveryNodeContext(boolean complete) {
+    public NodeStatsContext(boolean complete) {
         this.complete = complete;
         if (complete) {
             osName = BytesRefs.toBytesRef(Constants.OS_NAME);
@@ -330,5 +330,4 @@ public class DiscoveryNodeContext implements Streamable {
         DataTypes.STRING.writeValueTo(out, jvmVendor);
         DataTypes.STRING.writeValueTo(out, jvmVersion);
     }
-
 }
