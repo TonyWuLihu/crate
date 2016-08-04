@@ -22,6 +22,9 @@
 
 package io.crate.operation.collect.collectors;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 import io.crate.analyze.symbol.DefaultTraversalSymbolVisitor;
 import io.crate.analyze.symbol.Reference;
 import io.crate.analyze.symbol.Symbol;
@@ -43,11 +46,13 @@ import org.elasticsearch.cluster.node.DiscoveryNodes;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.transport.ReceiveTimeoutTransportException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NodeStatsCollector implements CrateCollector {
 
@@ -56,8 +61,8 @@ public class NodeStatsCollector implements CrateCollector {
     private final RoutedCollectPhase collectPhase;
     private final DiscoveryNodes nodes;
     private final CollectInputSymbolVisitor<RowCollectExpression<?, ?>> inputSymbolVisitor;
-    private IterableRowEmitter emitter;
     private final ReferenceIdentVisitor referenceIdentVisitor = ReferenceIdentVisitor.INSTANCE;
+    private final AtomicInteger remainingRequests = new AtomicInteger();
 
     public NodeStatsCollector(TransportNodeStatsAction transportStatTablesAction,
                               RowReceiver rowReceiver,
@@ -73,47 +78,65 @@ public class NodeStatsCollector implements CrateCollector {
 
     @Override
     public void doCollect() {
-        prepareCollect();
-        emitter.run();
+        remainingRequests.set(nodes.size());
+        final List<NodeStatsContext> rows = Collections.synchronizedList(new ArrayList<NodeStatsContext>());
+        for (final DiscoveryNode node : nodes) {
+
+            SettableFuture<NodeStatsContext> future = fetchRowFromNode(node, SettableFuture.<NodeStatsContext>create());
+            Futures.addCallback(future, new FutureCallback<NodeStatsContext>() {
+
+                @Override
+                public void onSuccess(NodeStatsContext context) {
+                    rows.add(context);
+                    if (remainingRequests.decrementAndGet() == 0) {
+                        emmitRows(rows);
+                    }
+                }
+
+                @Override
+                public void onFailure(@Nonnull Throwable t) {
+                    if (t instanceof ReceiveTimeoutTransportException) {
+                        rows.add(new NodeStatsContext(node.id(), node.name()));
+                        if (remainingRequests.decrementAndGet() == 0) {
+                            emmitRows(rows);
+                        }
+                    } else {
+                        rowReceiver.fail(t);
+                    }
+                }
+            });
+        }
     }
 
-    private void prepareCollect() {
-        final List<NodeStatsContext> nodeStatsContexts = new ArrayList<>(nodes.size());
-        final CountDownLatch counter = new CountDownLatch(nodes.size());
-        for (final DiscoveryNode node : nodes) {
-            List<ReferenceIdent> referenceIdents = referenceIdentVisitor.process(collectPhase.toCollect());
-            NodeStatsRequest request = new NodeStatsRequest(node.id(), referenceIdents);
-            transportStatTablesAction.execute(node.id(), request, new ActionListener<NodeStatsResponse>() {
-                @Override
-                public void onResponse(NodeStatsResponse response) {
-                    nodeStatsContexts.add(response.nodeStatsContext());
-                    counter.countDown();
-                }
+    private SettableFuture<NodeStatsContext> fetchRowFromNode(final DiscoveryNode node,
+                                                              final SettableFuture<NodeStatsContext> future) {
+        List<ReferenceIdent> toCollect = referenceIdentVisitor.process(collectPhase.toCollect());
+        final NodeStatsRequest request = new NodeStatsRequest(node.id(), toCollect);
 
-                @Override
-                public void onFailure(Throwable t) {
-                    if (t instanceof ReceiveTimeoutTransportException) {
-                        nodeStatsContexts.add(new NodeStatsContext(node.id(), node.name()));
-                    }
-                    counter.countDown();
-                }
-            }, TimeValue.timeValueMillis(3000L));
-        }
-        try {
-            counter.await();
-        } catch (InterruptedException e) {
-            rowReceiver.fail(e);
-        }
+        transportStatTablesAction.execute(node.id(), request, new ActionListener<NodeStatsResponse>() {
 
-        this.emitter = new IterableRowEmitter(
+            @Override
+            public void onResponse(NodeStatsResponse response) {
+                future.set(response.nodeStatsContext());
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                future.setException(t);
+            }
+        }, TimeValue.timeValueMillis(3000L));
+        return future;
+    }
+
+    private void emmitRows(List<NodeStatsContext> rows) {
+        new IterableRowEmitter(
             rowReceiver,
-            RowsTransformer.toRowsIterable(inputSymbolVisitor, collectPhase, nodeStatsContexts)
-        );
+            RowsTransformer.toRowsIterable(inputSymbolVisitor, collectPhase, rows)
+        ).run();
     }
 
     @Override
     public void kill(@Nullable Throwable throwable) {
-        emitter.kill(throwable);
     }
 
     private static class ReferenceIdentVisitor extends DefaultTraversalSymbolVisitor<ReferenceIdentVisitor.Context, Void> {
@@ -147,5 +170,4 @@ public class NodeStatsCollector implements CrateCollector {
             return null;
         }
     }
-
 }

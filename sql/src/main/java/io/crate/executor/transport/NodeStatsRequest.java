@@ -57,11 +57,11 @@ public class NodeStatsRequest extends TransportRequest {
         super.readFrom(in);
         nodeId = in.readString();
         columnIdents = new ArrayList<>();
-        int refIndentsSize = in.readVInt();
-        for (int i = 0; i < refIndentsSize; i++) {
-            ReferenceIdent referenceIdent = new ReferenceIdent();
-            referenceIdent.readFrom(in);
-            columnIdents.add(referenceIdent);
+        int columnIdentsSize = in.readVInt();
+        for (int i = 0; i < columnIdentsSize; i++) {
+            ReferenceIdent columnIdent = new ReferenceIdent();
+            columnIdent.readFrom(in);
+            columnIdents.add(columnIdent);
         }
     }
 
@@ -70,8 +70,8 @@ public class NodeStatsRequest extends TransportRequest {
         super.writeTo(out);
         out.writeString(nodeId);
         out.writeVInt(columnIdents.size());
-        for (ReferenceIdent referenceIdent : columnIdents) {
-            referenceIdent.writeTo(out);
+        for (ReferenceIdent columnIdent : columnIdents) {
+            columnIdent.writeTo(out);
         }
     }
 }

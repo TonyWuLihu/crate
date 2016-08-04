@@ -116,7 +116,7 @@ public class ShardCollectSource implements CollectSource {
         NodeSysReferenceResolver referenceResolver = new NodeSysReferenceResolver(nodeSysExpression);
         ImplementationSymbolVisitor implementationSymbolVisitor = new ImplementationSymbolVisitor(functions);
         EvaluatingNormalizer nodeNormalizer = new EvaluatingNormalizer(functions,
-                RowGranularity.NODE,
+                RowGranularity.DOC,
                 referenceResolver);
         RoutedCollectPhase normalizedPhase = collectPhase.normalize(nodeNormalizer, null);
 

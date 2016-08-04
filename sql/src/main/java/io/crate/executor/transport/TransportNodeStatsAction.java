@@ -36,7 +36,7 @@ import org.elasticsearch.transport.TransportService;
 public class TransportNodeStatsAction implements NodeAction<NodeStatsRequest, NodeStatsResponse> {
 
     private static final String ACTION_NAME = "crate/sql/sys/nodes";
-    private static final String EXECUTOR = ThreadPool.Names.PERCOLATE;
+    private static final String EXECUTOR = ThreadPool.Names.MANAGEMENT;
 
     private final NodeStatsContextFieldResolver nodeContextFieldsResolver;
     private final Transports transports;

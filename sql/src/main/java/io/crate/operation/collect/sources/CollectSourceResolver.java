@@ -107,7 +107,6 @@ public class CollectSourceResolver {
         this.tableFunctionSource = new ProjectorSetupCollectSource(tableFunctionCollectSource, projectorFactory);
 
         nodeDocCollectSources.put(SysClusterTableInfo.IDENT.fqn(), new ProjectorSetupCollectSource(singleRowSource, projectorFactory));
-        nodeDocCollectSources.put(SysNodesTableInfo.IDENT.fqn(), new ProjectorSetupCollectSource(nodeStatsCollectSource, projectorFactory));
 
         ProjectorSetupCollectSource sysSource = new ProjectorSetupCollectSource(systemCollectSource, projectorFactory);
         for (TableInfo tableInfo : sysSchemaInfo) {
@@ -115,6 +114,8 @@ public class CollectSourceResolver {
                 nodeDocCollectSources.put(tableInfo.ident().fqn(), sysSource);
             }
         }
+        nodeDocCollectSources.put(SysNodesTableInfo.IDENT.fqn(), new ProjectorSetupCollectSource(nodeStatsCollectSource, projectorFactory));
+
         for (TableInfo tableInfo : pgCatalogSchemaInfo) {
             nodeDocCollectSources.put(tableInfo.ident().fqn(), sysSource);
         }

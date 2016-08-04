@@ -31,28 +31,28 @@ import java.io.IOException;
 
 public class NodeStatsResponse extends TransportResponse {
 
-    private NodeStatsContext nodeStatsContext;
+    private NodeStatsContext context;
 
     public NodeStatsResponse() {
     }
 
-    public NodeStatsResponse(NodeStatsContext nodeStatsContext) {
-        this.nodeStatsContext = nodeStatsContext;
+    public NodeStatsResponse(NodeStatsContext context) {
+        this.context = context;
     }
 
     public NodeStatsContext nodeStatsContext() {
-        return nodeStatsContext;
+        return context;
     }
 
     @Override
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
-        nodeStatsContext = in.readOptionalStreamable(NodeStatsContext.newInstance());
+        context = in.readOptionalStreamable(NodeStatsContext.newInstance());
     }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
-        out.writeOptionalStreamable(nodeStatsContext);
+        out.writeOptionalStreamable(context);
     }
 }
