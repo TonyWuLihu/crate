@@ -48,13 +48,5 @@ public class NodeStatsFsDataExpression extends NodeStatsArrayTypeExpression<Exte
             put(NodeFsStatsExpression.PATH, input.path());
         }};
     }
-
-    public abstract static class Item<R> extends NodeStatsArrayTypeExpression<ExtendedFsStats.Info, R> {
-
-        @Override
-        protected List<ExtendedFsStats.Info> items() {
-            return Lists.newArrayList(this.row.extendedFsStats());
-        }
-    }
 }
 

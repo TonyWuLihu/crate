@@ -30,10 +30,7 @@ import io.crate.metadata.expressions.RowCollectExpressionFactory;
 import io.crate.metadata.sys.SysNodesTableInfo;
 import io.crate.monitor.ExtendedFsStats;
 import io.crate.monitor.ThreadPools;
-import io.crate.operation.reference.sys.node.fs.NodeStatsFsDataExpression;
-import io.crate.operation.reference.sys.node.fs.NodeStatsFsDisksExpression;
-import io.crate.operation.reference.sys.node.fs.NodeFsStatsExpression;
-import io.crate.operation.reference.sys.node.fs.NodeFsTotalStatsExpression;
+import io.crate.operation.reference.sys.node.fs.*;
 import org.apache.lucene.util.BytesRef;
 
 import java.util.Map;
@@ -324,7 +321,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_DEV, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDisksExpression.Item<BytesRef>() {
+                    return new NodeStatsFsArrayExpression<BytesRef>() {
                         @Override
                         protected BytesRef valueForItem(ExtendedFsStats.Info input) {
                             return input.dev();
@@ -335,7 +332,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_SIZE, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsArrayExpression<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.total();
@@ -346,7 +343,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_USED, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsArrayExpression<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.used();
@@ -357,7 +354,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_AVAILABLE, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsArrayExpression<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.available();
@@ -368,7 +365,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_READS, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsArrayExpression<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.diskReads();
@@ -379,7 +376,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_BYTES_READ, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsArrayExpression<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.diskReadSizeInBytes();
@@ -390,7 +387,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_WRITES, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsArrayExpression<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.diskWrites();
@@ -401,7 +398,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DISKS_BYTES_WRITTEN, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDisksExpression.Item<Long>() {
+                    return new NodeStatsFsArrayExpression<Long>() {
                         @Override
                         protected Long valueForItem(ExtendedFsStats.Info input) {
                             return input.diskWriteSizeInBytes();
@@ -418,7 +415,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DATA_DEV, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDataExpression.Item<BytesRef>() {
+                    return new NodeStatsFsArrayExpression<BytesRef>() {
                         @Override
                         protected BytesRef valueForItem(ExtendedFsStats.Info input) {
                             return input.dev();
@@ -429,7 +426,7 @@ public class SysNodesExpressionFactories {
             .put(SysNodesTableInfo.Columns.FS_DATA_PATH, new RowCollectExpressionFactory() {
                 @Override
                 public RowCollectExpression create() {
-                    return new NodeStatsFsDataExpression.Item<BytesRef>() {
+                    return new NodeStatsFsArrayExpression<BytesRef>() {
                         @Override
                         protected BytesRef valueForItem(ExtendedFsStats.Info input) {
                             return input.path();
